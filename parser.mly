@@ -34,7 +34,7 @@ program:
 
 
 main:
-    DFA MAIN LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE
+    DFA MAIN LPAREN param RPAREN LBRACE vdecl_list node_list RBRACE
     { { return = VOID;
     fname = "main";
     formals = $4;
@@ -57,6 +57,7 @@ dfadecl:
     formals = $5;
     body = List.rev $8 :: List.rev $9 }} 
 
+
 vdecl_list:
     {[]}
     | vdecl SEMI vdecl_list {(*A MAGICAL LIST OF VDECLS*)}
@@ -75,29 +76,14 @@ node_list:/*TODO come back here and think about START */
     {[]}
     | ID LBRACE meta_node_block RBRACE node_list {(*A list of nodes*)}
 
-meta_node_block: /*Enforces trans vs return node types*/
-      trans_node_list   {(*If you have a trans node, do trans_node_list*)}
-    | node_stmt_list return_stmt {(*Else, you have a return node*)}
 
-trans_node_list: /*For more transitions*/
-      ID TRANS STAR SEMI  {(*Force a catch-all transition at the end*)}
-    | node_stmt_list trans_stmt trans_node_list {(*do none or more stuff, then a transition, then repeat*)}
+meta_node_block:
+	return_stmt {}
 
-trans_stmt:
-    ID TRANS expr SEMI { (*Transition to state if true*)}
 
 return_stmt:
     RETURN expr SEMI  { (*return expression*)}
 
-node_stmt_list:
-    {[]}
-    | node_stmt node_stmt_list {(*A MAGICAL LIST OF NODE STMTS*)}
-
-node_stmt:
-      expr  SEMI { Expr($1)    }
-    | vdecl SEMI { (*Declare*) }
-    | ID LBRAC expr RBRAC ASSIGN expr SEMI {(*Assign value to map:essentially,map.push(key,val)*)}
-    | ID ASSIGN expr SEMI {(*Assign value to variable*)}
 
 formals_opt:
     {[]} /*nothing*/
@@ -109,7 +95,6 @@ formal_list:
 
 param:
       var_type ID { Formal(Datatype($1),Ident($2)) }
-    | var_type ID LT TYPE COMMA TYPE GT {(*FOR DECLARING A MAP*)} 
 
 expr_list:
     {[]}
