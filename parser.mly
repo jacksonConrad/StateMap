@@ -141,13 +141,5 @@ expr:
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | ID LBRAC expr RBRAC                     { (*Maps get element*) }
-  | ID DOT CONTAINS LPAREN expr RPAREN      { (*isMember function*)}
-  | ID DOT PUSH LPAREN expr RPAREN          { (*Push expr into*)   }
-  | ID DOT PUSH LPAREN expr COMMA expr RPAREN{(*Push into a map?*) }
-  | ID DOT POP                              { (*Pop from stack*)   }
-  | ID DOT DEL LPAREN expr RPAREN           { (*Delete a key from map*) }
-  | ID DOT PEEK                             { (*Peek key from stack*) }
-  | ID DOT SIZE                             { (*Get size of stack/Map (# of keys)*) }
-  | ID DOT KEYS                             { (*Get a ??STACK?? of keys? *) }
   | LPAREN expr RPAREN { $2 }
   | ID LPAREN expr_list RPAREN              {(*call a sub dfa*)}/*THIS IS A SHIFT/REDUCE ERROR WITH line 152 and line 123 maybe???*/
