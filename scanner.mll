@@ -2,8 +2,8 @@
 
 rule token = 
 	parse [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| '/*'     { comment lexbuf }           (* Multi-line comment *)
-| '//'     { singleComment lexbuf }     (* Single-line comments *)
+| "/*"     { comment lexbuf }           (* Multi-line comment *)
+| "//"     { singleComment lexbuf }     (* Single-line comments *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -18,28 +18,28 @@ rule token =
 | '/'      { DIVIDE }
 | '%'      { MOD }
 | '='      { ASSIGN }
-| '=='     { EQ }
-| '++'	{ INC }
-| '--'	{ DEC }
+| "=="     { EQ }
+| "++"	{ INC }
+| "--"	{ DEC }
 | '!'      { NOT }
-| '!='     { NEQ }
-| '&&'     { AND }
-| '||'     { OR }
+| "!="     { NEQ }
+| "&&"     { AND }
+| "||"     { OR }
 | '<'      { LT }
-| '<-'     { TRANS }
-| '<='     { LEQ }
+| "<-"     { TRANS }
+| "<="     { LEQ }
 | '>'      { GT }
-| '>='     { GEQ }
-| 'return' { RETURN }
-| 'int'    { INT }
-| 'double' { DOUBLE }
-| 'float'  { FLOAT }
-| 'string' { STRING }
-| 'void'   { VOID }
-| 'DFA'    { DFA }
-| 'main'   { MAIN }
-| 'stack'  { STACK }
-| 'del'	{ DEL }
+| ">="     { GEQ }
+| "return" { RETURN }
+| "int"    { INT }
+| "double" { DOUBLE }
+| "float"  { FLOAT }
+| "string" { STRING }
+| "void"   { VOID }
+| "DFA"    { DFA }
+| "main"   { MAIN }
+| "stack"  { STACK }
+| "del"	{ DEL }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | '"' (('\\' _  | [^'"'])* as lxm) '"'{ STRING_LITERAL(lxm) }
@@ -47,7 +47,7 @@ rule token =
 | _ as char { raise (Failure('illegal character ' ^ Char.escaped char)) }
 
 and comment = parse
-  '*/' { token lexbuf }
+  "*/" { token lexbuf }
 | _    { comment lexbuf }
 
 and singleComment = parse
