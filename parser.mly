@@ -60,13 +60,13 @@ dfadecl:
 
 vdecl_list:
     {[]}
-    | vdecl SEMI vdecl_list {(*A MAGICAL LIST OF VDECLS*)}
+    | vdecl vdecl_list {(*A MAGICAL LIST OF VDECLS*)}
 
 vdecl:
-      var_type ID { (*declare id*) }
-    | var_type ID COMMA id_list { (* declare multiple id's*) }
-    | var_type ID ASSIGN expr {(*assign expr to id*) }
-    | var_type ID COMMA id_list ASSIGN expr {(*Assign several variables to a single expr*)}
+      var_type ID SEMI { (*declare id*) }
+    | var_type ID COMMA id_list SEMI { (* declare multiple id's*) }
+    | var_type ID ASSIGN expr SEMI {(*assign expr to id*) }
+    | var_type ID COMMA id_list ASSIGN expr SEMI {(*Assign several variables to a single expr*)}
 
 id_list:
       ID {(*for one ID*)}
@@ -74,15 +74,27 @@ id_list:
 
 node_list:/*TODO come back here and think about START */
     {[]}
-    | ID LBRACE meta_node_block RBRACE node_list {(*A list of nodes*)}
+    | ID LBRACE stmt_list RBRACE node_list {(*A list of nodes*)}
 
+stmt_list:
+	{[]}
+	| stmt stmt_list {}
 
-meta_node_block:
+/* TODO: add method calls */
+stmt:
 	return_stmt {}
+	| trans_stmt {}
+	/*| node_block {} */
+	| vdecl {}
+	| expr SEMI {}
+
+trans_stmt:
+	ID TRANS expr SEMI {}
+	| ID TRANS STAR SEMI {}
 
 
 return_stmt:
-    RETURN expr SEMI  { (*return expression*)}
+    RETURN expr SEMI  {}
 
 
 formals_opt:
