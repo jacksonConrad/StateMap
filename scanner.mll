@@ -19,8 +19,8 @@ rule token =
 | '%'      { MOD }
 | '='      { ASSIGN }
 | "=="     { EQ }
-| "++"	{ INC }
-| "--"	{ DEC }
+| "++"	   { INC }
+| "--"	   { DEC }
 | '!'      { NOT }
 | "!="     { NEQ }
 | "&&"     { AND }
@@ -33,13 +33,11 @@ rule token =
 | "return" { RETURN }
 | "int"    { INT }
 | "double" { DOUBLE }
-| "float"  { FLOAT }
 | "string" { STRING }
 | "void"   { VOID }
 | "DFA"    { DFA }
 | "main"   { MAIN }
 | "stack"  { STACK }
-| "del"	{ DEL }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | '"' (('\\' _  | [^'"'])* as lxm) '"'{ STRING_LITERAL(lxm) }

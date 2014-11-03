@@ -1,17 +1,15 @@
 %{ open Ast %}
-%{ open Type %}
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA RBRAC LBRAC COLON DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN STAR
 %token NOT INC DEC
 %token EQ NEQ LT LEQ GT GEQ OR AND MOD
 %token RETURN TRANS
-%token KEYS DFA STACK MAP
-/* %token PUT PUSH POP PEEK SIZE CONTAINS DEL */
+%token DFA STACK
 %token <int> INT_LITERAL
 %token <string> STRING_LITERAL TYPE ID
 %token EOF
 %token MAIN
-%token STRING INT VOID
+%token STRING INT VOID DOUBLE
 
 %right ASSIGN
 %left EQ NEQ
@@ -30,7 +28,7 @@
 
 program:
     main {[],$1}
-    | dfadecl program { ($1 :: fst $2), snd $2 }
+    | dfa_decl program { ($1 :: fst $2), snd $2 }
 
 
 main:
@@ -43,14 +41,14 @@ main:
 var_type:
 	  INT   	{Int}
 	|STRING		{String}
-    |STACK      {Stack}
-    |MAP        {Map}
+    	|STACK      	{Stack}
+    	|DOUBLE         {Double}
 
 ret_type:
     var_type {Datatype($1)}
     | VOID {Datatype(Void)}
 
-dfadecl:
+dfa_decl:
     ret_type DFA ID LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE
     { { return = $1;
     fname = Ident($3);
@@ -82,20 +80,11 @@ stmt_list:
 
 /* TODO: add method calls */
 stmt:
-	return_stmt {}
-	| trans_stmt {}
-	/*| node_block {} */
-	| vdecl {}
-	| expr SEMI {}
-
-trans_stmt:
-	ID TRANS expr SEMI {}
-	| ID TRANS STAR SEMI {}
-
-
-return_stmt:
-    RETURN expr SEMI  {}
-
+	RETURN expr SEMI  {Return($2)}
+	| ID TRANS expr SEMI {Transition($1,$3)} 
+	| ID TRANS STAR SEMI {Transition($1,1)} /*Note expr = 1 here since eval( * )==TRUE*/
+	| vdecl {Declaration($1)}
+	| expr SEMI {Expr($1)}
 
 formals_opt:
     {[]} /*nothing*/
@@ -116,7 +105,7 @@ expr_list:
 expr:
     INT_LITERAL    { IntLit($1)   }
   | STRING_LITERAL { StringLit($1)}
-  | var_type LPAREN expr RPAREN { Cast(Datatype($1),$3)}
+  /*| var_type LPAREN expr RPAREN { Cast(Datatype($1),$3)}*/
   | ID               { Variable(Ident($1))  }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
@@ -131,12 +120,9 @@ expr:
   | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or ,   $3) }
-  | expr INC                { (*Unop(PostInc, $1)*) }
-  | expr DEC                { (*Unop(PostDec, $1)*) }
-  /*| INC expr                { (*Unop(PreInc, $2)*)}
-  | DEC expr                { (*Unop(PreDec, $2)*)} TODO FIGURE OUT HOW TO INCLUDE BOTH PRE AND POST FIX OPERATORS*/
+  | INC expr         { Unop(Inc, $2) (*Unop(PreInc, $1)*) }
+  | DEC expr         { Unop(Dec, $2) (*Unop(PreDec, $1)*) }
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
-  | ID LBRAC expr RBRAC                     { (*Maps get element*) }
   | LPAREN expr RPAREN { $2 }
-  | ID LPAREN expr_list RPAREN              {(*call a sub dfa*)}/*THIS IS A SHIFT/REDUCE ERROR WITH line 152 and line 123 maybe???*/
+  | ID LPAREN expr_list RPAREN              {Call($1, $3) (*call a sub dfa*)}
