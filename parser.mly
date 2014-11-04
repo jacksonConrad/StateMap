@@ -82,16 +82,14 @@ stmt_list:
 
 /* TODO: add method calls */
 stmt:
-	return_stmt {}
+	  return_stmt {}
 	| trans_stmt {}
-	/*| node_block {} */
 	| vdecl {}
 	| expr SEMI {}
 
 trans_stmt:
 	ID TRANS expr SEMI {}
 	| ID TRANS STAR SEMI {}
-
 
 return_stmt:
     RETURN expr SEMI  {}
