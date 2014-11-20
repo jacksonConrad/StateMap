@@ -1,3 +1,4 @@
 parser.mli
+parser.ml
 scanner.ml
-ast.cmi
+*.cmi
