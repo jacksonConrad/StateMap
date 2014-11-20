@@ -105,8 +105,8 @@ expr_list:
 expr:
     INT_LITERAL    { IntLit($1)   }
   | STRING_LITERAL { StringLit($1)}
-  /*| var_type LPAREN expr RPAREN { Cast(Datatype($1),$3)}*/
   | ID               { Variable(Ident($1))  }
+  | EOS              { EosLit }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -126,3 +126,6 @@ expr:
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }
   | ID LPAREN expr_list RPAREN              {Call($1, $3) (*call a sub dfa*)}
+  | ID DOT POP                              { Pop($1) }
+  | ID DOT PUSH LPAREN expr RPAREN          { Push($1, $5) }
+  | ID DOT PEEK                             { Peek($1) }
