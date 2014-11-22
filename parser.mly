@@ -27,62 +27,55 @@
 %%
 
 program:
-    main {[],$1}
-    | dfa_decl program { ($1 :: fst $2), snd $2 }
+    dfa_decl_list {$1}
 
-
-main:
-    DFA MAIN LPAREN param RPAREN LBRACE vdecl_list node_list RBRACE
-    { { return = VOID;
-    fname = "main";
-    formals = $4;
-    body = List.rev $7 :: List.rev $8 }}
-    
 var_type:
-	  INT   	{Int}
-	|STRING		{String}
-    	|STACK      	{Stack}
-    	|DOUBLE         {Double}
+     INT    {Int}
+    |STRING {String}
+    |STACK  {Stack}
+    |DOUBLE {Double}
+    |VOID   {Void}
 
 ret_type:
     var_type {Datatype($1)}
-    | VOID {Datatype(Void)}
 
 dfa_decl:
     ret_type DFA ID LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE
     { { return = $1;
     fname = Ident($3);
     formals = $5;
-    body = List.rev $8 :: List.rev $9 }} 
+    var_body = $8; 
+    node_body = $9}} 
+
+dfa_decl_list:
+  {[]}
+  | dfa_decl dfa_decl_list { $1 :: $2 }
 
 
 vdecl_list:
     {[]}
-    | vdecl vdecl_list {(*A MAGICAL LIST OF VDECLS*)}
+    | vdecl vdecl_list { $1 :: $2 } 
 
 vdecl:
-      var_type ID SEMI { (*declare id*) }
-    | var_type ID COMMA id_list SEMI { (* declare multiple id's*) }
-    | var_type ID ASSIGN expr SEMI {(*assign expr to id*) }
-    | var_type ID COMMA id_list ASSIGN expr SEMI {(*Assign several variables to a single expr*)}
+      var_type ID SEMI { VarDecl(Datatype($1), Ident($2)) }
+    | var_type ID ASSIGN expr SEMI { VarAssignDecl(Datatype($1), Ident($2), ExprVal($4))}
 
-id_list:
-      ID {(*for one ID*)}
-    | ID COMMA id_list {(*keep getting more ID's*)}
-
-node_list:/*TODO come back here and think about START */
+node_list:
     {[]}
-    | ID LBRACE stmt_list RBRACE node_list {(*A list of nodes*)}
+    | node node_list { $1 :: $2 }
+
+node:
+  ID LBRACE stmt_list RBRACE { Node(Ident($1), $3) }
 
 stmt_list:
 	{[]}
-	| stmt stmt_list {}
+	| stmt stmt_list { $1 :: $2 }
 
 /* TODO: add method calls */
 stmt:
 	RETURN expr SEMI  {Return($2)}
-	| ID TRANS expr SEMI {Transition($1,$3)} 
-	| ID TRANS STAR SEMI {Transition($1,1)} /*Note expr = 1 here since eval( * )==TRUE*/
+	| ID TRANS expr SEMI {Transition(Ident($1),$3)} 
+	| ID TRANS STAR SEMI {Transition(Ident($1),IntLit(1))} /*Note expr = 1 here since eval( * )==TRUE*/
 	| vdecl {Declaration($1)}
 	| expr SEMI {Expr($1)}
 
@@ -113,9 +106,9 @@ expr:
   | expr DIVIDE expr { Binop($1, Div,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Less,  $3) }
+  | expr LT     expr { Binop($1, Lt,  $3) }
   | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Greater,$3)}
+  | expr GT     expr { Binop($1, Gt,$3)}
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
@@ -125,7 +118,8 @@ expr:
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }
-  | ID LPAREN expr_list RPAREN              {Call($1, $3) (*call a sub dfa*)}
+  | ID LPAREN expr_list RPAREN              { Call($1, $3) (*call a sub dfa*)}
   | ID DOT POP                              { Pop($1) }
   | ID DOT PUSH LPAREN expr RPAREN          { Push($1, $5) }
   | ID DOT PEEK                             { Peek($1) }
+  | ID LPAREN expr_list RPAREN {Call(Ident($1), $3) (*call a sub dfa*)}

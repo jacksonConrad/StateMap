@@ -42,13 +42,17 @@ type stmt =
 type formal = 
     Formal of datatype * ident
 
+type node = 
+    Node of ident * stmt list
+
 type dfa_decl = {
     return : datatype;
     fname: ident;
     formals : formal list;
-    body : stmt list;
+    var_body : decl list;
+    node_body : node list;
 }
 
+
 type program = 
-    dfa_decl list (*TODO: Not sure what open/close parens mean...program might actually
-                    be more complicated. Referencing ast.mli for Slang lang*)
+    dfa_decl list
