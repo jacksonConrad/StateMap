@@ -27,56 +27,49 @@
 %%
 
 program:
-    main {[],$1}
-    | dfa_decl program { ($1 :: fst $2), snd $2 }
+    dfa_decl_list {$1}
 
-
-main:
-    DFA MAIN LPAREN param RPAREN LBRACE vdecl_list node_list RBRACE
-    { { return = VOID;
-    fname = "main";
-    formals = $4;
-    body = List.rev $7 :: List.rev $8 }}
-    
 var_type:
-	  INT   	{Int}
-	|STRING		{String}
-    	|STACK      	{Stack}
-    	|DOUBLE         {Double}
+     INT    {Int}
+    |STRING {String}
+    |STACK  {Stack}
+    |DOUBLE {Double}
+    |VOID   {Void}
 
 ret_type:
     var_type {Datatype($1)}
-    | VOID {Datatype(Void)}
 
 dfa_decl:
     ret_type DFA ID LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE
     { { return = $1;
     fname = Ident($3);
     formals = $5;
-    body = List.rev $8 :: List.rev $9 }} 
+    var_body = $8; 
+    node_body = $9}} 
+
+dfa_decl_list:
+  {[]}
+  | dfa_decl dfa_decl_list { $2 :: $1 }
 
 
 vdecl_list:
     {[]}
-    | vdecl vdecl_list {(*A MAGICAL LIST OF VDECLS*)}
+    | vdecl vdecl_list { $2 :: $1 } 
 
 vdecl:
-      var_type ID SEMI { (*declare id*) }
-    | var_type ID COMMA id_list SEMI { (* declare multiple id's*) }
-    | var_type ID ASSIGN expr SEMI {(*assign expr to id*) }
-    | var_type ID COMMA id_list ASSIGN expr SEMI {(*Assign several variables to a single expr*)}
-
-id_list:
-      ID {(*for one ID*)}
-    | ID COMMA id_list {(*keep getting more ID's*)}
+      var_type ID SEMI { VarDecl(Datatype($1), Ident($2)) }
+    | var_type ID ASSIGN expr SEMI { VarAssignDecl(Datatype($1), Ident($2), ExprVal($4))}
 
 node_list:/*TODO come back here and think about START */
     {[]}
-    | ID LBRACE stmt_list RBRACE node_list {(*A list of nodes*)}
+    | node node_list { $1 :: $2 }
+
+node:
+  ID LBRACE stmt_list RBRACE { Node($1, $3) }
 
 stmt_list:
 	{[]}
-	| stmt stmt_list {}
+	| stmt stmt_list { $2 :: $1 }
 
 /* TODO: add method calls */
 stmt:
