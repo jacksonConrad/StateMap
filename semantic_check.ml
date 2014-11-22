@@ -103,6 +103,11 @@ let find_variable env name =
     with Not_found -> try List.find(fun (s,_,_) -> s=name) env.node_scope.parent.variables
     with Not_found -> raise Not_found
 
+(*search for variable in local symbol tables*)
+    let find_local_variable env name =
+    try List.find (fun (s,_,_) -> s=name) env.var_scope.variables
+    with Not_found -> raise Not_found
+
 let peek env stack = function
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
@@ -177,5 +182,31 @@ let rec get_sexpr env e = match e with
       | Pop(id) -> SPop(SIdent(id, get_var_scope env id), check_expr env e)
       | Peek(id) -> SPeek(SIdent(id, get_var_scope env id), check_expr env e)
 
+let get_sval env = function
+    ExprVal(expr) -> SExprVal(get_sexpr env expr)
 
+(*not sure about checking type of stack. eg: Analagous to get_data_type_of_list in Slang Line 236*)
 
+let get_datatype_from_val env = function
+    ExprVal(expr) -> check_expr env expr
+
+let get_sdecl env decl =
+    try find_local_variable env v with not Not_found -> raise(Error("Variable
+        already declared")) in match decl with
+        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
+        | VarAssignDecl(datatype, ident, value) -> 
+            let sv = get_sval env value in
+        (SVarAssignDecl(datatype, SIdent(ident, Local), sv), env)
+
+let get_name_type_from_decl decl = match decl with
+    VarDecl(datatype, ident) -> (ident, datatype)
+        | VarAssignDecl(datatype,ident,value) -> (ident,datatype)
+
+let get_name_type_val_from_decl decl = match decl with
+    VarDecl(datatype, ident) -> (ident, datatype, None)
+    | VarAssignDecl(datatype, ident, value) -> (ident, datatype, Some(value))
+
+(* returns tuple (left hand id, left hand id type, right hand value type) *)
+let get_name_type_from_var env = function
+    VarDecl(datatype,ident) -> (ident,datatype,None)
+    | VarAssignDecl(datatype,ident,value) -> (ident,datatype,Some(value))
