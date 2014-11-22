@@ -49,33 +49,33 @@ dfa_decl:
 
 dfa_decl_list:
   {[]}
-  | dfa_decl dfa_decl_list { $2 :: $1 }
+  | dfa_decl dfa_decl_list { $1 :: $2 }
 
 
 vdecl_list:
     {[]}
-    | vdecl vdecl_list { $2 :: $1 } 
+    | vdecl vdecl_list { $1 :: $2 } 
 
 vdecl:
       var_type ID SEMI { VarDecl(Datatype($1), Ident($2)) }
     | var_type ID ASSIGN expr SEMI { VarAssignDecl(Datatype($1), Ident($2), ExprVal($4))}
 
-node_list:/*TODO come back here and think about START */
+node_list:
     {[]}
     | node node_list { $1 :: $2 }
 
 node:
-  ID LBRACE stmt_list RBRACE { Node($1, $3) }
+  ID LBRACE stmt_list RBRACE { Node(Ident($1), $3) }
 
 stmt_list:
 	{[]}
-	| stmt stmt_list { $2 :: $1 }
+	| stmt stmt_list { $1 :: $2 }
 
 /* TODO: add method calls */
 stmt:
 	RETURN expr SEMI  {Return($2)}
-	| ID TRANS expr SEMI {Transition($1,$3)} 
-	| ID TRANS STAR SEMI {Transition($1,1)} /*Note expr = 1 here since eval( * )==TRUE*/
+	| ID TRANS expr SEMI {Transition(Ident($1),$3)} 
+	| ID TRANS STAR SEMI {Transition(Ident($1),IntLit(1))} /*Note expr = 1 here since eval( * )==TRUE*/
 	| vdecl {Declaration($1)}
 	| expr SEMI {Expr($1)}
 
@@ -106,9 +106,9 @@ expr:
   | expr DIVIDE expr { Binop($1, Div,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Less,  $3) }
+  | expr LT     expr { Binop($1, Lt,  $3) }
   | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Greater,$3)}
+  | expr GT     expr { Binop($1, Gt,$3)}
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
@@ -118,4 +118,4 @@ expr:
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }
-  | ID LPAREN expr_list RPAREN              {Call($1, $3) (*call a sub dfa*)}
+  | ID LPAREN expr_list RPAREN {Call(Ident($1), $3) (*call a sub dfa*)}
