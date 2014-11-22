@@ -35,7 +35,7 @@ type stmt =
     Expr of expr | 
     Declaration of decl |
     Assign of ident * expr |
-    TransWrapper of expr |
+    (*TransWrapper of expr | Why do we have this????*)
     Transition of ident * expr |
     Return of expr
 
