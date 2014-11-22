@@ -1,13 +1,13 @@
 %{ open Ast %}
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA RBRAC LBRAC COLON DOT
-%token PLUS MINUS TIMES DIVIDE ASSIGN STAR
+%token PLUS MINUS TIMES DIVIDE ASSIGN STAR PUSH POP PEEK
 %token NOT INC DEC
 %token EQ NEQ LT LEQ GT GEQ OR AND MOD
 %token RETURN TRANS
 %token DFA STACK
 %token <int> INT_LITERAL
 %token <string> STRING_LITERAL TYPE ID
-%token EOF
+%token EOF EOS
 %token MAIN
 %token STRING INT VOID DOUBLE
 
@@ -99,7 +99,7 @@ expr:
     INT_LITERAL    { IntLit($1)   }
   | STRING_LITERAL { StringLit($1)}
   | ID               { Variable(Ident($1))  }
-  | EOS              { EosLit }
+  /*| EOS              { EosLit } */
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -118,8 +118,8 @@ expr:
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }
-  | ID LPAREN expr_list RPAREN              { Call($1, $3) (*call a sub dfa*)}
-  | ID DOT POP                              { Pop($1) }
-  | ID DOT PUSH LPAREN expr RPAREN          { Push($1, $5) }
-  | ID DOT PEEK                             { Peek($1) }
+  | ID LPAREN expr_list RPAREN              { Call(Ident($1), $3) (*call a sub dfa*)}
+  /*| ID DOT POP                              { Pop($1) } */
+  /*| ID DOT PUSH LPAREN expr RPAREN          { Push($1, $5) } */
+  /*| ID DOT PEEK                             { Peek($1) }*/
   | ID LPAREN expr_list RPAREN {Call(Ident($1), $3) (*call a sub dfa*)}
