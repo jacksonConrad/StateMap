@@ -1,5 +1,5 @@
 open Ast
-open Sast
+(*open Sast*)
 
 type symbol_table = {
     parent: symbol_table option;
@@ -7,7 +7,8 @@ type symbol_table = {
 }
 
 type dfa_table = {
-    dfas: (var_type * ident * formal list * sstmt list) list
+    dfas: (var_type * ident * formal list * stmt list) list
+    (*dfas: (var_type * ident * formal list * sstmt list) list *)
 } (*Jacked sstmt from Slang. Did NOT use stmt. sstmt is defined in sast*)
 
 type translation_environment = {
@@ -51,7 +52,7 @@ let rec get_type_from_datatype = function
     | Stacktype(ty) -> get_type_from_datatype ty
 
 let get_binop_return_value op typ1 typ2 = 
-    le t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
+    let t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
     let (t, valid) = 
         match op with 
             Add -> basic_math t1 t2
@@ -104,21 +105,21 @@ let find_variable env name =
     with Not_found -> raise Not_found
 
 (*search for variable in local symbol tables*)
-    let find_local_variable env name =
+let find_local_variable env name =
     try List.find (fun (s,_,_) -> s=name) env.var_scope.variables
     with Not_found -> raise Not_found
 
-let peek env stack = function
+let peek env stack = 
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
             raise(Error("Undeclared Stack ")) in id
 
-let push env stack = function
+let push env stack = 
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
             raise(Error("Undeclared Stack ")) in id
    
-let pop env stack = function
+let pop env stack = 
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
             raise(Error("Undeclared Stack ")) in id
@@ -187,14 +188,27 @@ let get_sval env = function
 
 let get_datatype_from_val env = function
     ExprVal(expr) -> check_expr env expr
-
+(*
 let get_sdecl env decl =
-    try find_local_variable env v with not Not_found -> raise(Error("Variable
-        already declared")) in match decl with
+    try find_local_variable env v with 
+        not Not_found -> raise(Error("Variable already declared")) in match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
         (SVarAssignDecl(datatype, SIdent(ident, Local), sv), env)
+*)
+(* TODO FIX THIS MOTHERFUCKER*)
+(*
+let get_sdecl env decl = 
+    try match find_local_variable env v with
+            Not_found -> 
+                match decl with
+                    VarDecl(datatype,ident) -> 
+                        (SVarDecl(datatype,SIdent(ident,Local)),env)
+                    | VarAssignDecl(datatype,ident,value) ->
+                        let sv = get_sval env value in
+                            (SVarAssignDecl(datatype,SIdent(ident,Local),sv),env)
+            | _ -> raise(Error("Variable already declared"))*)
 
 let get_name_type_from_decl decl = match decl with
     VarDecl(datatype, ident) -> (ident, datatype)
@@ -219,7 +233,8 @@ let add_to_var_table env name t v =
 let add_to_global_table env name t v = 
     let new_vars = (name,t,v)::env.node_scope.parent.variables in
     let new_sym_table = {parent=env.node_scope.parent.parent; variables = new_vars;} in
-    let new_env = {env with env.node_scope.parent = new_sym_table} in
+    let new_node_scope = {env.node_scope with parent = new_sym_table} in
+    let new_env = {env with node_scope = new_node_scope} in
     new_env
 
 (* check both sides of an assignment are compatible*) 
@@ -245,11 +260,12 @@ let check_final_env env =
     true
 
 (* Default Table and Environment Initializations *)
-let empty_table_initialization = {parent=None; variables =[];}
+let empty_table_initialization = {parent= None; variables =[];}
+let empty_node_scope_initialization = {parent = empty_table_initialization; variables = [];}
 let empty_dfa_table_initialization = {dfas=[]}
 let empty_environment = {return_type = Datatype(Void); return_seen = false;
-    location="main"; node_scope.parent = empty_table_initialization; 
-    var_scope=empty_table_initialization; dfa_lookup = empty_dfa_table_initialization}
+    location="main"; node_scope=empty_node_scope_initialization; 
+    dfa_lookup = empty_dfa_table_initialization}
 
 let find_global_variable env name = 
     try List.find (fun (s,_,_) -> s=name) env.node_scope.parent.variables
@@ -334,7 +350,7 @@ check_stmt env stmt = match stmt with
        let t=get_type_from_datatype(check_expr env e) in
        (if not(t=Int) then
            raise(Error("Improper Transition Expression Datatype")));
-       (STransition((get_sexpr env ex), env)
+       (STransition((get_sexpr env ex), env))
 
 let get_sstmt_list env stmt_list = 
      List.fold_left (fun (sstmt_list,env) stmt -> 
