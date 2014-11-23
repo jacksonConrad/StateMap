@@ -19,6 +19,7 @@
 %left TIMES DIVIDE MOD
 %right NOT
 %right UMINUS DEC INC /*TODO HOW TO MAKE DEC/INC BIND LEFT AND RIGHT!? AND IN WHAT PRECEDENCE???*/
+%left PUSH POP PEEK
 %nonassoc LPAREN RPAREN LBRAC RBRAC
 
 %start program
@@ -27,7 +28,8 @@
 %%
 
 program:
-    dfa_decl_list {$1}
+  {[]}
+  | dfa_decl program { $1 :: $2 }
 
 var_type:
      INT    {Int}
@@ -46,11 +48,6 @@ dfa_decl:
     formals = $5;
     var_body = $8; 
     node_body = $9}} 
-
-dfa_decl_list:
-  {[]}
-  | dfa_decl dfa_decl_list { $1 :: $2 }
-
 
 vdecl_list:
     {[]}
@@ -99,7 +96,7 @@ expr:
     INT_LITERAL    { IntLit($1)   }
   | STRING_LITERAL { StringLit($1)}
   | ID               { Variable(Ident($1))  }
-  /*| EOS              { EosLit } */
+  | EOS              { EosLit } 
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -118,8 +115,7 @@ expr:
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }
-  | ID LPAREN expr_list RPAREN              { Call(Ident($1), $3) (*call a sub dfa*)}
-  /*| ID DOT POP                              { Pop($1) } */
-  /*| ID DOT PUSH LPAREN expr RPAREN          { Push($1, $5) } */
-  /*| ID DOT PEEK                             { Peek($1) }*/
+  | ID DOT POP                              { Pop(Ident($1)) } 
+  | ID DOT PUSH LPAREN expr RPAREN          { Push(Ident($1), $5) }
+  | ID DOT PEEK                             { Peek(Ident($1)) } 
   | ID LPAREN expr_list RPAREN {Call(Ident($1), $3) (*call a sub dfa*)}

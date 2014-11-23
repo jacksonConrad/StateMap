@@ -13,15 +13,15 @@ type datatype =
 type expr = 
     IntLit of int | 
     StringLit of string |
-    (* EosLit of EOS | *)
+    EosLit |
     Variable of ident |
     Unop of unop * expr |
     Binop of expr * binop * expr |
     ExprAssign of ident * expr |
     Call of ident * expr list |
-    Push of expr |
-    Pop of expr |
-    Peek of expr
+    Push of ident * expr |
+    Pop of ident |
+    Peek of ident 
 
 type value = 
     ExprVal of expr
