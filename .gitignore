@@ -2,3 +2,4 @@ parser.mli
 parser.ml
 scanner.ml
 *.cmi
+*.cmo

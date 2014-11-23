@@ -1,4 +1,4 @@
-type var_type = Int | String | Stack | Double | Void 
+type var_type = Int | String | Stack | Double | Void
 
 type binop = Add | Sub | Mult | Div | Mod | Equal | Neq | And | Or| Lt | Leq | Gt | Geq
 type unop = Inc | Dec | Not | Neg
@@ -13,15 +13,15 @@ type datatype =
 type expr = 
     IntLit of int | 
     StringLit of string |
-    EosLit of EOS |
+    EosLit |
     Variable of ident |
     Unop of unop * expr |
     Binop of expr * binop * expr |
     ExprAssign of ident * expr |
     Call of ident * expr list |
-    Push of expr |
-    Pop of expr |
-    Peek of expr
+    Push of ident * expr |
+    Pop of ident |
+    Peek of ident 
 
 type value = 
     ExprVal of expr
@@ -35,28 +35,24 @@ type stmt =
     Expr of expr | 
     Declaration of decl |
     Assign of ident * expr |
-    TransWrapper of expr |
+    (*TransWrapper of expr | Why do we have this????*)
     Transition of ident * expr |
     Return of expr
 
 type formal = 
     Formal of datatype * ident
 
-type node = {
-    name: ident;
-    body: stmt list;
-}
+type node = 
+    Node of ident * stmt list
 
 type dfa_decl = {
     return : datatype;
     fname: ident;
     formals : formal list;
-    var_body : stmt list;
+    var_body : decl list;
     node_body : node list;
 }
 
 
 type program = 
     dfa_decl list
-    (*TODO: Not sure what open/close parens mean...program might actually
-                    be more complicated. Referencing ast.mli for Slang lang*)

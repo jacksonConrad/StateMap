@@ -9,7 +9,7 @@ compile:
 	ocamllex scanner.mll
 	ocamlc -c scanner.ml
 	# ocamlc -c sast.mli
-	# ocamlc -c semantic_check.ml
+	ocamlc -c semantic_check.ml
 
 #Tack on your own targets
 .PHONY : all
