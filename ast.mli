@@ -1,4 +1,4 @@
-type var_type = Int | String | Stack | Double | Void
+type var_type = Int | String | Stack | Float | Void
 
 type binop = Add | Sub | Mult | Div | Mod | Equal | Neq | And | Or| Lt | Leq | Gt | Geq
 type unop = Inc | Dec | Not | Neg
@@ -13,7 +13,7 @@ type datatype =
 type expr = 
     IntLit of int | 
     StringLit of string |
-    EosLit |
+    FloatLit of float |
     Variable of ident |
     Unop of unop * expr |
     Binop of expr * binop * expr |

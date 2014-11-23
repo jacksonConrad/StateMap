@@ -1,15 +1,17 @@
 open Ast
-(*open Sast*)
+open Sast
+
+exception Error of string
 
 type symbol_table = {
-    parent: symbol_table option;
+    parent: symbol_table;
     variables: (ident * datatype * value option) list;
 }
 
 type dfa_table = {
-    dfas: (var_type * ident * formal list * stmt list) list
-    (*dfas: (var_type * ident * formal list * sstmt list) list *)
-} (*Jacked sstmt from Slang. Did NOT use stmt. sstmt is defined in sast*)
+    dfas: (ident * var_type * formal list * stmt list) list
+    (*dfas: (var_type * ident * formal list * sstmt list) list*)
+} (*sstmt defined in sast...*)
 
 type translation_environment = {
     return_type: datatype;
@@ -25,24 +27,24 @@ let rec find_dfa (dfa_lookup: dfa_table) name =
     List.find (fun (s,_,_,_) -> s=name) dfa_lookup.dfas
 
 let basic_math t1 t2 = match (t1, t2) with
-    (Double, Int) -> (Double, true)
-    | (Int, Double) -> (Double, true)
+    (Float, Int) -> (Float, true)
+    | (Int, Float) -> (Float, true)
     | (Int, Int) -> (Int, true)
-    | (Double, Double) -> (Int, true)
+    | (Float, Float) -> (Int, true)
     | (_,_) -> (Int, false)
 
 let relational_logic t1 t2 = match (t1, t2) with
     (Int,Int) -> (Int,true)
-    | (Double,Double) -> (Int,true)
-    | (Int,Double) -> (Int,true)
-    | (Double,Int) -> (Int,true)
+    | (Float,Float) -> (Int,true)
+    | (Int,Float) -> (Int,true)
+    | (Float,Int) -> (Int,true)
     | (_,_) -> (Int, false) 
 
 let equal_logic t1 t2 = match(t1,t2) with
     (Int,Int) -> (Int,true)
-    | (Double,Double) -> (Int,true)
-    | (Int,Double) -> (Int,true)
-    | (Double,Int) -> (Int,true)
+    | (Float,Float) -> (Int,true)
+    | (Int,Float) -> (Int,true)
+    | (Float,Int) -> (Int,true)
     | (String,String) -> (Int,true)
     | (_,_) -> (Int,false) 
 
@@ -106,7 +108,7 @@ let find_variable env name =
 
 (*search for variable in local symbol tables*)
 let find_local_variable env name =
-    try List.find (fun (s,_,_) -> s=name) env.var_scope.variables
+    try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
     with Not_found -> raise Not_found
 
 let peek env stack = 
@@ -127,7 +129,7 @@ let pop env stack =
 (*Semantic checking on expressions*)
 let rec check_expr env e = match e with
     IntLit(i) ->Datatype(Int)
-    | DoubleLit(f) -> Datatype(Double)
+    | FloatLit(f) -> Datatype(Float)
     | StringLit(s) -> Datatype(String)
     | Variable(v) -> 
         let (_,s_type,_) = try find_variable env v with 
@@ -136,7 +138,7 @@ let rec check_expr env e = match e with
     | Unop(u, e) -> 
         let t = check_expr env e in 
         (match u with
-             _ -> if t = Datatype(Int) then t else if t = Datatype(Double) then t 
+             _ -> if t = Datatype(Int) then t else if t = Datatype(Float) then t 
                         else
                             raise (Error("Cannot perform operation on " )))
     | Binop(e1, b, e2) -> 
@@ -147,7 +149,14 @@ let rec check_expr env e = match e with
     | ExprAssign(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
         in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
-    | Call(id, e) -> try (let (fname, fret, fargs, fbody)  = find_dfa env.dfa_scope id in
+    | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
+        check_expr env e 
+        in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
+    | Pop(id) -> let (_,t1,_) = try (find_variable env id) with Not_found ->
+        raise (Error("Undeclared identifier")) in t1
+    | Peek(id) -> let (_,t1,_) = try (find_variable env id) with Not_found ->
+        raise (Error("Undeclared identifier")) in t1
+    | Call(id, e) -> try (let (fname, fret, fargs, fbody)  = find_dfa env.dfa_lookup id in
                 let el_tys = List.map (fun exp -> check_expr env exp) e in
                 let fn_tys = List.map (fun farg-> let (_,ty,_) = get_name_type_from_formal env farg in ty) fargs in
                 if not (el_tys = fn_tys) then
@@ -155,10 +164,7 @@ let rec check_expr env e = match e with
                     Datatype(fret))
             with Not_found ->
                 raise (Error("Undeclared Function "))
-    | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
-        check_expr env e 
-        in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
-
+   
 let get_var_scope env name =  
     try (let (_,_,_) = List.find (fun (s,_,_) -> s=name) env.node_scope.variables in NodeScope)
               with Not_found -> try (let (_,_,_) = List.find(fun (s,_,_) -> s=name) env.node_scope.parent.variables in DFAScope)
@@ -167,7 +173,7 @@ let get_var_scope env name =
 (*converts expr to sexpr*)
 let rec get_sexpr env e = match e with
       IntLit(i) -> SIntLit(i, Datatype(Int))
-      | DoubleLit(d) -> SDoubleLit(d,Datatype(Double))
+      | FloatLit(d) -> SFloatLit(d,Datatype(Float))
       | StringLit(s) -> SStringLit(s,Datatype(String))
       | Variable(id) -> SVariable(SIdent(id, get_var_scope env id), check_expr env e)
       | Unop(u,ex) -> SUnop(u, get_sexpr env ex, check_expr env e)

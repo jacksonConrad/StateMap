@@ -32,7 +32,7 @@ rule token =
 | ">="     { GEQ }
 | "return" { RETURN }
 | "int"    { INT }
-| "double" { DOUBLE }
+| "float"  { FLOAT }
 | "string" { STRING }
 | "void"   { VOID }
 | "DFA"    { DFA }
@@ -41,7 +41,6 @@ rule token =
 | "pop"    { POP }
 | "push"   { PUSH }
 | "peek"   { PEEK }
-| "EOS"    { EOS }
 | ['0'-'9']+ as lxm { INT_LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | '"' (('\\' _  | [^'"'])* as lxm) '"'{ STRING_LITERAL(lxm) }

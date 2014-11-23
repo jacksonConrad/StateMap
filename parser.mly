@@ -6,10 +6,11 @@
 %token RETURN TRANS
 %token DFA STACK
 %token <int> INT_LITERAL
-%token <string> STRING_LITERAL TYPE ID
-%token EOF EOS
+%token <string> STRING_LITERAL TYPE ID 
+%token <float> FLOAT_LITERAL
+%token EOF
 %token MAIN
-%token STRING INT VOID DOUBLE
+%token STRING INT VOID FLOAT
 
 %right ASSIGN
 %left EQ NEQ
@@ -35,7 +36,7 @@ var_type:
      INT    {Int}
     |STRING {String}
     |STACK  {Stack}
-    |DOUBLE {Double}
+    |FLOAT  {Float}
     |VOID   {Void}
 
 ret_type:
@@ -94,9 +95,9 @@ expr_list:
 
 expr:
     INT_LITERAL    { IntLit($1)   }
-  | STRING_LITERAL { StringLit($1)}
+  | STRING_LITERAL { StringLit($1) }
+  | FLOAT_LITERAL  { FloatLit($1) }
   | ID               { Variable(Ident($1))  }
-  | EOS              { EosLit } 
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
