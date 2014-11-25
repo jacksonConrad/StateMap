@@ -59,6 +59,7 @@ type program = dfa_decl list
 (* Low-level AST printing, to help debug the structure.  These functions are
    only for debugging (the -r flag) and can be removed. *)
 
+
 let rec expr_s = function
    Literal(l) -> "Literal " ^ string_of_int l
  | Id(s) -> "Id " ^ s
@@ -93,9 +94,9 @@ let func_decl_s f =
 let program_s (vars, funcs) = "([" ^ String.concat ", " vars ^ "],\n" ^
   String.concat "\n" (List.map func_decl_s funcs) ^ ")"
 
-"Pretty printed" version of the AST, meant to generate a MicroC program
+(* "Pretty printed" version of the AST, meant to generate a MicroC program
    from the AST.  These functions are only for pretty-printing (the -a flag)
-   the AST and can be removed.
+   the AST and can be removed. *)
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l

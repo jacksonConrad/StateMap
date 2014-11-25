@@ -2,7 +2,7 @@ default: all
 
 .PHONY : compile
 compile:
-	ocamlc -c ast.mli
+	ocamlc -c ast.ml
 	ocamlyacc parser.mly
 	ocamlc -c parser.mli
 	ocamlc -c parser.ml
