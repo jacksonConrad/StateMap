@@ -3,3 +3,4 @@ parser.ml
 scanner.ml
 *.cmi
 *.cmo
+statemap
