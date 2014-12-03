@@ -1,0 +1,84 @@
+//Synchronous Counter with 2 T-Flip-Flops and Display 
+DFA main(stack<string> main)							
+{
+	int halfPeriod = 250;
+
+	start											
+	{	
+		Concurrent clock(halfPeriod), TFF1(), TFF2(), display();
+	}	
+}
+
+// DFA to represent a clock
+//  halfPeriod: integer to represent period/2 in ms
+void DFA clock(int halfPeriod)
+{
+	// Start == low	
+	// Wait halfPeriod ms, then toggle
+	start
+	{
+		wait(halfPeriod);
+		rising		<- *;				
+	}
+
+	// state that triggers a toggle for the TFFs
+	rising
+	{
+		high		<- *;
+	}			
+	
+	high
+	{
+		wait(halfPeriod);
+		start 	<- *;
+	}
+}
+
+// 1st T-FlipFlop in counter
+//  Toggles on every rising clock
+void DFA TFF1()
+{
+	// low output
+	start
+	{
+		high 	<- (clock.state == rising);
+	}
+
+	// high output
+	high
+	{
+		start	<- (clock.state == rising);
+	}		
+}
+
+// 2nd T-FlipFlop in counter
+//	Toggles on every clock only if TFF1 is high
+void DFA TFF2()
+{
+	// low output
+	start
+	{
+		high	<-(clock.state == rising & TFF1.state = high);
+	}
+
+	// high output
+	high
+	{
+		start	<-(clock.state == rising & TFF1.state = high);
+	}		
+}
+
+void DFA display()
+{
+	start
+	{
+		print
+
+	}
+
+	print
+	{
+
+	}
+	
+}
