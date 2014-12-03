@@ -17,7 +17,7 @@ void DFA clock(int halfPeriod)
 	// Wait halfPeriod ms, then toggle
 	start
 	{
-		wait(halfPeriod);
+		sleep(halfPeriod);
 		rising		<- *;				
 	}
 
@@ -29,7 +29,7 @@ void DFA clock(int halfPeriod)
 	
 	high
 	{
-		wait(halfPeriod);
+		sleep(halfPeriod);
 		start 	<- *;
 	}
 }
@@ -41,14 +41,14 @@ void DFA TFF1()
 	// low output
 	start
 	{
-		high 	<- (clock.state == "rising");
+		high 	<- (state("clock") == "rising");
 		start 	<- *;
 	}
 
 	// high output
 	high
 	{
-		start	<- (clock.state == "rising");
+		start	<- (state("clock") == "rising");
 		high 	<- *;
 	}		
 }
@@ -60,14 +60,14 @@ void DFA TFF2()
 	// low output
 	start
 	{
-		high	<-(clock.state == "rising" & TFF1.state == "high");
+		high	<-(state("clock") == "rising" & state("TFF1") == "high");
 		start 	<- *;
 	}
 
 	// high output
 	high
 	{
-		start	<-(clock.state == "rising" & TFF1.state == "high");
+		start	<-(state("clock") == "rising" & state("TFF1") == "high");
 		high 	<- *;
 	}		
 }
@@ -78,10 +78,10 @@ void DFA display()
 {
 	start
 	{
-		print0 	<- (clock.state == "rising" & TFF1.state == "high" & TFF2.state == "high");	
-		print1 	<- (clock.state == "rising" & TFF1.state == "start" & TFF2.state == "start");
-		print2 	<- (clock.state == "rising" & TFF1.state == "high" & TFF2.state == "start");
-		print3 	<- (clock.state == "rising" & TFF1.state == "start" & TFF2.state == "high");
+		print0 	<- (state("clock") == "rising" & state("TFF1") == "high" & state("TFF2") == "high");	
+		print1 	<- (state("clock") == "rising" & state("TFF1") == "start" & state("TFF2") == "start");
+		print2 	<- (state("clock") == "rising" & state("TFF1") == "high" & state("TFF2") == "start");
+		print3 	<- (state("clock") == "rising" & state("TFF1") == "start" & state("TFF2") == "high");
 		start 	<- *;
 	}
 
