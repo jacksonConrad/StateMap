@@ -23,8 +23,8 @@ void DFA clock(int halfPeriod)
 
 	// state that triggers a toggle for the TFFs
 	rising
-	{
-		high		<- *;
+	{		
+		high  	<- *;
 	}			
 	
 	high
@@ -41,13 +41,15 @@ void DFA TFF1()
 	// low output
 	start
 	{
-		high 	<- (clock.state == rising);
+		high 	<- (clock.state == "rising");
+		start 	<- *;
 	}
 
 	// high output
 	high
 	{
-		start	<- (clock.state == rising);
+		start	<- (clock.state == "rising");
+		high 	<- *;
 	}		
 }
 
@@ -58,27 +60,52 @@ void DFA TFF2()
 	// low output
 	start
 	{
-		high	<-(clock.state == rising & TFF1.state = high);
+		high	<-(clock.state == "rising" & TFF1.state == "high");
+		start 	<- *;
 	}
 
 	// high output
 	high
 	{
-		start	<-(clock.state == rising & TFF1.state = high);
+		start	<-(clock.state == "rising" & TFF1.state == "high");
+		high 	<- *;
 	}		
 }
 
+//	Prints a number to standard out based on
+// 	 states of the TFFs
 void DFA display()
 {
 	start
 	{
-		print
-
+		print0 	<- (clock.state == "rising" & TFF1.state == "high" & TFF2.state == "high");	
+		print1 	<- (clock.state == "rising" & TFF1.state == "start" & TFF2.state == "start");
+		print2 	<- (clock.state == "rising" & TFF1.state == "high" & TFF2.state == "start");
+		print3 	<- (clock.state == "rising" & TFF1.state == "start" & TFF2.state == "high");
+		start 	<- *;
 	}
 
-	print
+	print0
 	{
-
+		print("0\n");
+		start 	<- *;
 	}
-	
+
+	print1
+	{
+		print("1\n");
+		start 	<- *;
+	}
+
+	print2
+	{
+		print("2\n");
+		start 	<- *;
+	}
+
+	print3
+	{
+		print("3\n");
+		start 	<- *;
+	}	
 }
