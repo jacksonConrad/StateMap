@@ -134,7 +134,7 @@ let rec string_of_datatype = function
     (match vartype with 
       Int -> "int" | String -> "String" | Stack -> "Stack" | Double -> "Double" | Void -> "Void"
     )
-  | Stacktype(datatype) -> string_of_datatype datatype
+  | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
 
 let rec string_of_decl = function
     VarDecl(dt, id) -> string_of_datatype dt ^ " " ^ string_of_ident id

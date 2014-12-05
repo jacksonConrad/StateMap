@@ -32,14 +32,14 @@ program:
   | dfa_decl program { $1 :: $2 }
 
 var_type:
-     INT    {Int}
-    |STRING {String}
-    |STACK LT var_type GT  {Stack}
-    |DOUBLE {Double}
-    |VOID   {Void}
+     INT                   {Int}
+    |STRING                {String}
+    |DOUBLE                {Double}
+    |VOID                  {Void}
 
 ret_type:
-    var_type {Datatype($1)}
+    var_type {Datatype($1)} |
+    STACK LT var_type GT {Stacktype(Datatype($3))}
 
 dfa_decl:
     ret_type DFA ID LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE
@@ -55,7 +55,8 @@ vdecl_list:
 
 vdecl:
       var_type ID SEMI { VarDecl(Datatype($1), Ident($2)) }
-    | var_type ID ASSIGN expr SEMI { VarAssignDecl(Datatype($1), Ident($2), ExprVal($4))}
+    | var_type ID ASSIGN expr SEMI { VarAssignDecl(Datatype($1), Ident($2), ExprVal($4))} 
+    | STACK LT var_type GT ID SEMI { VarDecl(Stacktype(Datatype($3)), Ident($5)) }
 
 node_list:
     {[]}
@@ -86,6 +87,7 @@ formal_list:
 
 param:
       var_type ID { Formal(Datatype($1),Ident($2)) }
+      | STACK LT var_type GT ID { Formal(Stacktype(Datatype($3)), Ident($5)) }
 
 expr_list:
     {[]}
