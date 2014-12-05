@@ -1,4 +1,4 @@
-type var_type = Int | String | Stack | Double | Void
+type var_type = Int | String | Stack | Double | Void | Dfa
 
 type binop = Add | Sub | Mult | Div | Mod | Equal | Neq | And | Or| Lt | Leq | Gt | Geq
 type unop = Inc | Dec | Not | Neg
@@ -132,11 +132,12 @@ let rec string_of_expr = function
 let rec string_of_datatype = function
   Datatype(vartype) -> 
     (match vartype with 
-      Int -> "int" | String -> "String" | Stack -> "Stack" | Double -> "Double" | Void -> "Void"
+      Int -> "int" | String -> "String" | Stack -> "Stack" | Double -> "Double"
+      | Void -> "Void" | Dfa -> "Dfa"
     )
   | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
 
-let rec string_of_decl = function
+let string_of_decl = function
     VarDecl(dt, id) -> string_of_datatype dt ^ " " ^ string_of_ident id
   | VarAssignDecl(dt,id,value) -> string_of_datatype dt ^ " " ^ string_of_ident id
       ^ " = " ^ (match value with 
@@ -160,7 +161,7 @@ let rec string_of_stmt = function
 
 
 
-let rec string_of_node = function
+let string_of_node = function
   Node(id, stmtlist) -> string_of_ident id ^ " {\n" ^
     String.concat "\n" (List.map string_of_stmt stmtlist) ^ "\n}"
 

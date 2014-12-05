@@ -51,7 +51,7 @@ let rec get_type_from_datatype = function
     | Stacktype(ty) -> get_type_from_datatype ty
 
 let get_binop_return_value op typ1 typ2 = 
-    le t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
+    let t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
     let (t, valid) = 
         match op with 
             Add -> basic_math t1 t2
@@ -104,21 +104,21 @@ let find_variable env name =
     with Not_found -> raise Not_found
 
 (*search for variable in local symbol tables*)
-    let find_local_variable env name =
+let find_local_variable env name =
     try List.find (fun (s,_,_) -> s=name) env.var_scope.variables
     with Not_found -> raise Not_found
 
-let peek env stack = function
+let peek env stack = 
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
             raise(Error("Undeclared Stack ")) in id
 
-let push env stack = function
+let push env stack = 
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
             raise(Error("Undeclared Stack ")) in id
    
-let pop env stack = function
+let pop env stack = 
     let (_,id,_)  = try find_variable env stack with
         Not_found ->
             raise(Error("Undeclared Stack ")) in id
@@ -248,14 +248,17 @@ let check_final_env env =
 let empty_table_initialization = {parent=None; variables =[];}
 let empty_dfa_table_initialization = {
     dfas=[
+        dfa=retrun, name, formal_list var_list node_list
     (*The state() function to get states of concurrently running dfas*)
-    (String, Ident("state"), [Formal(Datatype(String),Ident("dfa"))],[],[]),
+        (String, Ident("state"), [Formal(Datatype(String),Ident("dfa"))],[],[]);
     (*The built-in print function (only prints strings)*)
-    (Void, Ident("print"), [Formal(Datatype(String),Ident("str"))],[],[]),
+        (Void, Ident("print"), [Formal(Datatype(String),Ident("str"))],[],[]);
     (*The built-in sleep function*)
-    (Void, Ident("sleep"), [Formal(Datatype(Int),Ident("ms"),[],[]),
+        (Void, Ident("sleep"), [Formal(Datatype(Int),Ident("ms"),[],[]);
     (*The built-in int-to-string conversion function*)
-    (String, Ident("itos"), [Formal(Datatype(Int),Ident("int"),[],[])
+        (String, Ident("itos"), [Formal(Datatype(Int),Ident("int"),[],[]);
+    (*The built-in concurrent string*)
+        (Stack(Datatype(String)), Ident("concurrent"), formal list,[],[])
     ]}
 let empty_environment = {return_type = Datatype(Void); return_seen = false;
     location="main"; node_scope.parent = empty_table_initialization; 

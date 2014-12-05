@@ -36,6 +36,7 @@ var_type:
     |STRING                {String}
     |DOUBLE                {Double}
     |VOID                  {Void}
+    |DFA                   {Dfa}
 
 ret_type:
     var_type {Datatype($1)} |
