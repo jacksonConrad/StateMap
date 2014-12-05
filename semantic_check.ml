@@ -51,7 +51,7 @@ let rec get_type_from_datatype = function
     | Stacktype(ty) -> get_type_from_datatype ty
 
 let get_binop_return_value op typ1 typ2 = 
-    let t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
+  let t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
     let (t, valid) = 
         match op with 
             Add -> basic_math t1 t2
@@ -189,12 +189,19 @@ let get_datatype_from_val env = function
     ExprVal(expr) -> check_expr env expr
 
 let get_sdecl env decl =
-    try find_local_variable env v with not Not_found -> raise(Error("Variable
-        already declared")) in match decl with
+    try find_local_variable env v with
+      Not_found -> match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
         (SVarAssignDecl(datatype, SIdent(ident, Local), sv), env)
+
+      | _ -> raise(Error("Variable already declared"))
+(*    if Not_found then match decl with
+        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
+        | VarAssignDecl(datatype, ident, value) -> 
+            let sv = get_sval env value in
+        (SVarAssignDecl(datatype, SIdent(ident, Local), sv), env)*)
 
 let get_name_type_from_decl decl = match decl with
     VarDecl(datatype, ident) -> (ident, datatype)
