@@ -36,7 +36,6 @@ rule token =
 | "string" { STRING }
 | "void"   { VOID }
 | "DFA"    { DFA }
-| "main"   { MAIN }
 | "stack"  { STACK }
 | "pop"    { POP }
 | "push"   { PUSH }

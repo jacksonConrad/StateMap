@@ -1,3 +1,27 @@
-void DFA main()							
-{
+void DFA main(int lol, double gg, stack<string> huh, string welp) {
+  int a;
+  string b;
+  stack<int> c;
+  double d;
+  void e;
+
+  whee {
+    return 5;
+  }
+
+  wowza {
+    ayo <- *;
+    int kldsa;
+    ayo2 <- kldsa + ladkasl == 5;
+    main2(kldsa, c);
+  }
+
+  start {
+    Concurrent(clock(), yo(), yoyo());
+  }
+}
+
+void DFA main2(string foo, int bar) {
+  void a;
+  string br0;
 }

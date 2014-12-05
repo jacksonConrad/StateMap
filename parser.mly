@@ -34,7 +34,7 @@ program:
 var_type:
      INT    {Int}
     |STRING {String}
-    |STACK  {Stack}
+    |STACK LT var_type GT  {Stack}
     |DOUBLE {Double}
     |VOID   {Void}
 
