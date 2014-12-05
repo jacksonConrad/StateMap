@@ -246,7 +246,17 @@ let check_final_env env =
 
 (* Default Table and Environment Initializations *)
 let empty_table_initialization = {parent=None; variables =[];}
-let empty_dfa_table_initialization = {dfas=[]}
+let empty_dfa_table_initialization = {
+    dfas=[
+    (*The state() function to get states of concurrently running dfas*)
+    (String, Ident("state"), [Formal(Datatype(String),Ident("dfa"))],[],[]),
+    (*The built-in print function (only prints strings)*)
+    (Void, Ident("print"), [Formal(Datatype(String),Ident("str"))],[],[]),
+    (*The built-in sleep function*)
+    (Void, Ident("sleep"), [Formal(Datatype(Int),Ident("ms"),[],[]),
+    (*The built-in int-to-string conversion function*)
+    (String, Ident("itos"), [Formal(Datatype(Int),Ident("int"),[],[])
+    ]}
 let empty_environment = {return_type = Datatype(Void); return_seen = false;
     location="main"; node_scope.parent = empty_table_initialization; 
     var_scope=empty_table_initialization; dfa_lookup = empty_dfa_table_initialization}
