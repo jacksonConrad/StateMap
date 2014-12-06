@@ -1,4 +1,4 @@
-type var_type = Int | String | Stack | Double | Void | Dfa
+type var_type = Int | String | Stack | Double | Void
 
 type binop = Add | Sub | Mult | Div | Mod | Equal | Neq | And | Or| Lt | Leq | Gt | Geq
 type unop = Inc | Dec | Not | Neg
@@ -13,6 +13,7 @@ type datatype =
 type expr = 
     IntLit of int | 
     StringLit of string |
+    DoubleLit of float  |
     EosLit |
     Variable of ident |
     Unop of unop * expr |
@@ -106,6 +107,7 @@ let string_of_ident = function
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
   | StringLit(l) -> l
+  | DoubleLit(l) -> string_of_float l
   | Variable(id) -> string_of_ident id 
   | Unop(o, e) -> 
       string_of_expr e ^ " " ^ 
@@ -133,7 +135,7 @@ let rec string_of_datatype = function
   Datatype(vartype) -> 
     (match vartype with 
       Int -> "int" | String -> "String" | Stack -> "Stack" | Double -> "Double"
-      | Void -> "Void" | Dfa -> "Dfa"
+      | Void -> "Void"
     )
   | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
 

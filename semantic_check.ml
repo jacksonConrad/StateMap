@@ -1,5 +1,8 @@
 open Ast
 open Sast
+(*open Option*)
+
+exception Error of string
 
 type symbol_table = {
     parent: symbol_table option;
@@ -7,7 +10,7 @@ type symbol_table = {
 }
 
 type dfa_table = {
-    dfas: (var_type * ident * formal list * sstmt list) list
+    dfas: (datatype * ident * formal list * sstmt list) list
 } (*Jacked sstmt from Slang. Did NOT use stmt. sstmt is defined in sast*)
 
 type translation_environment = {
@@ -15,13 +18,14 @@ type translation_environment = {
     return_seen: bool; 
     location: string; (*Which DFA we're in*)
     node_scope: symbol_table; (*Scope of current node*)
+   (* node_lookup: string list;*)
     (*dfa_scope: symbol_table; (*Scope of current DFA*)*)
     dfa_lookup: dfa_table; (*Table of all DFAs*)
 }
 
 (* search for a function in our function table*)
 let rec find_dfa (dfa_lookup: dfa_table) name = 
-    List.find (fun (s,_,_,_) -> s=name) dfa_lookup.dfas
+    List.find (fun (_,s,_,_) -> s=name) dfa_lookup.dfas
 
 let basic_math t1 t2 = match (t1, t2) with
     (Double, Int) -> (Double, true)
@@ -78,7 +82,15 @@ let get_name_type_from_formal env = function
 let update_variable env (name, datatype, value) = 
     let ((_,_,_), location) = 
     try (fun node_scope -> ((List.find (fun (s,_,_) -> s=name) node_scope),1)) env.node_scope.variables
-        with Not_found -> try (fun node_scope -> ((List.find (fun (s,_,_) -> s=name) node_scope),2)) env.node_scope.parent.variables
+        with 
+        Not_found ->
+        try
+        let globalScope = match env.node_scope.parent with
+        Some scope -> scope
+        | None -> raise(Error("No Global Scope1"))
+        in  
+        (fun node_scope -> ((List.find (fun (s,_,_) -> s=name)
+        node_scope),2)) globalScope.variables
             with Not_found -> raise Not_found in
     let new_envf =
     match location with 
@@ -90,8 +102,13 @@ let update_variable env (name, datatype, value) =
             new_env
         | 2 -> 
             (* update dfa vars *)
-            let new_vars = List.map (fun (n, t, v) -> if(n=name) then (name, datatype, value) else (n, t, v)) env.node_scope.parent.variables in
-            let new_sym_table = {parent = env.node_scope.parent.parent; variables = new_vars;} in
+            let globalScope = match env.node_scope.parent with
+              Some scope -> scope
+            | None -> raise(Error("No Global Scope2"))
+            in
+            let new_vars = List.map (fun (n, t, v) -> if(n=name) then (name,
+            datatype, value) else (n, t, v)) globalScope.variables in
+            let new_sym_table = {parent = None; variables = new_vars;} in
             let new_env = {env with node_scope = new_sym_table} in
             new_env
         | _ -> raise(Error("Undefined scope"))
@@ -99,13 +116,17 @@ let update_variable env (name, datatype, value) =
 
 (*search for variable in global and local symbol tables*)
 let find_variable env name =
+  let globalScope = match env.node_scope.parent with
+    Some scope -> scope
+    |None -> raise(Error("No Global Scope3"))
+  in
     try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> try List.find(fun (s,_,_) -> s=name) env.node_scope.parent.variables
+    with Not_found -> try List.find(fun (s,_,_) -> s=name) globalScope.variables
     with Not_found -> raise Not_found
 
 (*search for variable in local symbol tables*)
 let find_local_variable env name =
-    try List.find (fun (s,_,_) -> s=name) env.var_scope.variables
+    try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
     with Not_found -> raise Not_found
 
 let peek env stack = 
@@ -146,39 +167,45 @@ let rec check_expr env e = match e with
     | ExprAssign(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
         in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
-    | Call(id, e) -> try (let (fname, fret, fargs, fbody)  = find_dfa env.dfa_scope id in
+    | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
+        check_expr env e 
+        in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
+    | Call(id, e) -> try (let (fret, fname, fargs, fbody)  = find_dfa
+    env.dfa_lookup id in
                 let el_tys = List.map (fun exp -> check_expr env exp) e in
                 let fn_tys = List.map (fun farg-> let (_,ty,_) = get_name_type_from_formal env farg in ty) fargs in
                 if not (el_tys = fn_tys) then
                     raise (Error("Mismatching types in function call")) else
-                    Datatype(fret))
+                    fret)
             with Not_found ->
                 raise (Error("Undeclared Function "))
-    | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
-        check_expr env e 
-        in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
-
-let get_var_scope env name =  
+  
+let get_node_scope env name = 
+  let globalScope = match env.node_scope.parent with
+    Some scope -> scope
+    |None -> raise(Error("No Global Scope4"))
+  in 
     try (let (_,_,_) = List.find (fun (s,_,_) -> s=name) env.node_scope.variables in NodeScope)
-              with Not_found -> try (let (_,_,_) = List.find(fun (s,_,_) -> s=name) env.node_scope.parent.variables in DFAScope)
-                    with Not_found -> raise(Error("get_var_scope is failing"))
+              with Not_found -> try (let (_,_,_) = List.find(fun (s,_,_) ->
+                s=name) globalScope.variables in DFAScope)
+                    with Not_found -> raise(Error("get_node_scope is failing"))
 
 (*converts expr to sexpr*)
 let rec get_sexpr env e = match e with
       IntLit(i) -> SIntLit(i, Datatype(Int))
       | DoubleLit(d) -> SDoubleLit(d,Datatype(Double))
       | StringLit(s) -> SStringLit(s,Datatype(String))
-      | Variable(id) -> SVariable(SIdent(id, get_var_scope env id), check_expr env e)
+      | Variable(id) -> SVariable(SIdent(id, get_node_scope env id), check_expr env e)
       | Unop(u,ex) -> SUnop(u, get_sexpr env ex, check_expr env e)
       | Binop(e1,b,e2) -> SBinop(get_sexpr env e1,b, get_sexpr env e2,check_expr env e)
-      | ExprAssign(id,ex) -> SExprAssign(SIdent(id, get_var_scope env id),
+      | ExprAssign(id,ex) -> SExprAssign(SIdent(id, get_node_scope env id),
       get_sexpr env ex,check_expr env e) 
       | Call(id, ex_list) -> let s_ex_list = List.map(fun exp -> get_sexpr env
-      exp) ex_list in SCall(SIdent(id,Global),s_ex_list, check_expr env e) 
-      | Push(id, ex) -> SPush(SIdent(id, get_var_scope env id),
+      exp) ex_list in SCall(SIdent(id,DFAScope),s_ex_list, check_expr env e) 
+      | Push(id, ex) -> SPush(SIdent(id, get_node_scope env id),
       get_sexpr env ex,check_expr env e)
-      | Pop(id) -> SPop(SIdent(id, get_var_scope env id), check_expr env e)
-      | Peek(id) -> SPeek(SIdent(id, get_var_scope env id), check_expr env e)
+      | Pop(id) -> SPop(SIdent(id, get_node_scope env id), check_expr env e)
+      | Peek(id) -> SPeek(SIdent(id, get_node_scope env id), check_expr env e)
 
 let get_sval env = function
     ExprVal(expr) -> SExprVal(get_sexpr env expr)
@@ -189,13 +216,13 @@ let get_datatype_from_val env = function
     ExprVal(expr) -> check_expr env expr
 
 let get_sdecl env decl =
-    try find_local_variable env v with
-      Not_found -> match decl with
-        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
+    (*try find_local_variable env v with
+      Not_found ->*) (* CHECK TO SEE IF THIS ACTUALLY WORKS!!!!!!!!!!!!!!!!!!!*)
+    match decl with
+        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, NodeScope)), env)
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
-        (SVarAssignDecl(datatype, SIdent(ident, Local), sv), env)
-
+        (SVarAssignDecl(datatype, SIdent(ident, NodeScope), sv), env)
       | _ -> raise(Error("Variable already declared"))
 (*    if Not_found then match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
@@ -224,18 +251,22 @@ let add_to_var_table env name t v =
 
 (*function that adds variables to environment's global_scope for use with main*)
 let add_to_global_table env name t v = 
-    let new_vars = (name,t,v)::env.node_scope.parent.variables in
-    let new_sym_table = {parent=env.node_scope.parent.parent; variables = new_vars;} in
-    let new_env = {env with env.node_scope.parent = new_sym_table} in
+  let globalScope = match env.node_scope.parent with
+    Some scope -> scope
+    |None -> raise(Error("No Global Scope4"))
+  in
+    let new_vars = (name,t,v)::globalScope.variables in
+    let new_sym_table = {parent=None; variables = new_vars;} in
+    let new_node_scope = {env.node_scope with parent = Some new_sym_table} in
+    let new_env = {env with node_scope = new_node_scope} in
     new_env
 
 (* check both sides of an assignment are compatible*) 
 let check_assignments type1 type2 = match (type1, type2) with
     (Int, Int) -> true
-    |(Float, Float) -> true
-    |(Int, Float) -> true
-    |(Float, Int) -> true
-    |(Boolean, Boolean) -> true
+    |(Double, Double) -> true
+    |(Int, Double) -> true
+    |(Double, Int) -> true
     |(String, String) -> true
     |(_,_) -> false
 
@@ -255,24 +286,27 @@ let check_final_env env =
 let empty_table_initialization = {parent=None; variables =[];}
 let empty_dfa_table_initialization = {
     dfas=[
-        dfa=retrun, name, formal_list var_list node_list
     (*The state() function to get states of concurrently running dfas*)
-        (String, Ident("state"), [Formal(Datatype(String),Ident("dfa"))],[],[]);
+        (Datatype(String), Ident("state"), [Formal(Datatype(String),Ident("dfa"))],[]);
     (*The built-in print function (only prints strings)*)
-        (Void, Ident("print"), [Formal(Datatype(String),Ident("str"))],[],[]);
+        (Datatype(Void), Ident("print"), [Formal(Datatype(String),Ident("str"))],[]);
     (*The built-in sleep function*)
-        (Void, Ident("sleep"), [Formal(Datatype(Int),Ident("ms"),[],[]);
+        (Datatype(Void), Ident("sleep"), [Formal(Datatype(Int),Ident("ms"))],[]);
     (*The built-in int-to-string conversion function*)
-        (String, Ident("itos"), [Formal(Datatype(Int),Ident("int"),[],[]);
+        (Datatype(String), Ident("itos"), [Formal(Datatype(Int),Ident("int"))],[]);
     (*The built-in concurrent string*)
-        (Stack(Datatype(String)), Ident("concurrent"), formal list,[],[])
+        (Stacktype(Datatype(String)), Ident("concurrent"), [] ,[]) (*how to
+        check formals*)
     ]}
 let empty_environment = {return_type = Datatype(Void); return_seen = false;
-    location="main"; node_scope.parent = empty_table_initialization; 
-    var_scope=empty_table_initialization; dfa_lookup = empty_dfa_table_initialization}
+    location="main"; node_scope = {empty_table_initialization with parent =
+      Some(empty_table_initialization)}; (*node_lookup = [];*) dfa_lookup = empty_dfa_table_initialization}
 
-let find_global_variable env name = 
-    try List.find (fun (s,_,_) -> s=name) env.node_scope.parent.variables
+let find_global_variable env name =
+  let globalScope = match env.node_scope.parent with
+  Some scope -> scope 
+    | None -> raise (Error("No global scope5")) in
+    try List.find (fun (s,_,_) -> s=name) globalScope.variables
     with Not_found -> raise Not_found
 
 let initialize_globals (globals, env) decl = 
@@ -280,24 +314,23 @@ let initialize_globals (globals, env) decl =
         let ((_,dt,_),found) = try (fun f -> ((f env name),true)) find_global_variable with 
             Not_found ->
                 ((name,ty,None),false) in
-        let ret = if(found=false) then
+        if(found=false) then
             match decl with
                 VarDecl(datatype,ident) ->
                     let (name,ty,_) = get_name_type_from_var env decl in
                     let new_env = add_to_global_table env name ty None in
-                    (SVarDecl(datatype,SIdent(ident,Global))::globals, new_env)
+                    (SVarDecl(datatype,SIdent(ident,DFAScope))::globals, new_env)
                 | VarAssignDecl(dt, id, value) ->
                     let t1 = get_type_from_datatype(dt) and t2 = get_type_from_datatype(get_datatype_from_val env value) in
                     if(t1=t2) then
                         let (n, t, v) = get_name_type_val_from_decl decl in
                         let new_env = add_to_global_table env n t v in
-                        (SVarAssignDecl(dt,SIdent(id,Global),get_sval env value)::globals, new_env)
+                        (SVarAssignDecl(dt,SIdent(id,DFAScope),get_sval env value)::globals, new_env)
                     else raise (Error("Type mismatch"))
                 else
-                    raise (Error("Multiple declarations")) in ret
+                    raise (Error("Multiple declarations"))
 
-
-check_stmt env stmt = match stmt with
+let rec check_stmt env stmt = match stmt with
     | Block(stmt_list) ->
         let new_env=env in
         let getter(env,acc) s =
@@ -349,12 +382,13 @@ check_stmt env stmt = match stmt with
             raise (Error("Mismatched type assignments"));
         let sexpr = get_sexpr env expr in
         let new_env = update_variable env (ident,dt,Some((ExprVal(expr)))) in
-        (SAssign(SIdent(ident, get_var_scope env ident), sexpr), new_env)
+        (SAssign(SIdent(ident, get_node_scope env ident), sexpr), new_env)
    | Transition(idState,ex) ->
-       let t=get_type_from_datatype(check_expr env e) in
-       (if not(t=Int) then
-           raise(Error("Improper Transition Expression Datatype")));
-       (STransition((get_sexpr env ex), env)
+       (*TODO check that idState in node_lookup/MAKE find_node_state env ident*)
+       let t=get_type_from_datatype(check_expr env ex) in
+       if not(t=Int) then
+           raise(Error("Improper Transition Expression Datatype")) else
+       (STransition(SIdent(idState, get_node_scope env idState), get_sexpr env ex), env)
 
 let get_sstmt_list env stmt_list = 
      List.fold_left (fun (sstmt_list,env) stmt -> 
@@ -371,7 +405,7 @@ let add_dfa env sdfa_decl =
             let dfa_type = get_type_from_datatype sdfastr.sreturn in
             let dfa_formals = sdfastr.sformals in
             let dfa_body = sdfastr.sbody in
-            let new_dfas = (dfa_name, dfa_type, dfa_formals, dfa_body)::old_dfas in
+            let new_dfas = (Datatype(dfa_type), dfa_name, dfa_formals, dfa_body)::old_dfas in
             let new_dfa_lookup = {dfas = new_dfas} in
             let final_env = {env with dfa_lookup = new_dfa_lookup} in
             final_env
