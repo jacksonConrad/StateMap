@@ -24,6 +24,7 @@ and sexpr =
     | SPeek of sident * datatype
     | SPop of sident * datatype
     | SPush of sident * sexpr * datatype
+    | SEosLit
 
 type sdecl =
 	SVarDecl of datatype * sident (* put these inside decl_list for each timeblock *)
@@ -38,15 +39,19 @@ type sstmt =
 	| SAssign of sident * sexpr
   | STransition of sident * sexpr 
 
+type snode = 
+  SNode of sident * sstmt 
+
 type sdfastr = {
   sreturn: datatype;
   sdfaname : ident;
   sformals : formal list;
-  sbody : sstmt list;
+  svar_body : sstmt list;
+  snode_body: snode list;
 }
 
 type sdfa_decl =
 	SDfa_Decl of sdfastr * datatype
 
 type sprogram = 
-  Prog of sdfa_decl list * sexpr list
+  Prog of sdfa_decl list * sdecl list

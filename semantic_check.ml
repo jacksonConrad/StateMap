@@ -10,7 +10,7 @@ type symbol_table = {
 }
 
 type dfa_table = {
-    dfas: (datatype * ident * formal list * sstmt list) list
+    dfas: (datatype * ident * formal list * sstmt list * snode list) list
 } (*Jacked sstmt from Slang. Did NOT use stmt. sstmt is defined in sast*)
 
 type translation_environment = {
@@ -25,7 +25,7 @@ type translation_environment = {
 
 (* search for a function in our function table*)
 let rec find_dfa (dfa_lookup: dfa_table) name = 
-    List.find (fun (_,s,_,_) -> s=name) dfa_lookup.dfas
+    List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas
 
 let basic_math t1 t2 = match (t1, t2) with
     (Double, Int) -> (Double, true)
@@ -53,6 +53,7 @@ let equal_logic t1 t2 = match(t1,t2) with
 let rec get_type_from_datatype = function
     Datatype(t)->t
     | Stacktype(ty) -> get_type_from_datatype ty
+    | Eostype(Eos) -> Void
 
 let get_binop_return_value op typ1 typ2 = 
   let t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
@@ -149,6 +150,7 @@ let rec check_expr env e = match e with
     IntLit(i) ->Datatype(Int)
     | DoubleLit(f) -> Datatype(Double)
     | StringLit(s) -> Datatype(String)
+    | EosLit -> Eostype(Eos)
     | Variable(v) -> 
         let (_,s_type,_) = try find_variable env v with 
             Not_found ->
@@ -166,17 +168,22 @@ let rec check_expr env e = match e with
         operator"));
     | ExprAssign(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
-        in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
+        in (if not (t1 = t2) then (raise (Error("Mismatch in types for
+        assignment")))); t2 (*check_expr env e*)
     | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
-        in (if not (t1 = t2) then (raise (Error("Mismatch in types for assignment")))); check_expr env e
-    | Call(id, e) -> try (let (fret, fname, fargs, fbody)  = find_dfa
+        in (if not (t1 = t2) then (raise (Error("Mismatch in types for
+        assignment")))); t2 (*check_expr env e*)
+    | Pop(id) -> let (_,t1,_) = (find_variable env id) in t1
+    | Peek(id) -> let (_,t1,_) = (find_variable env id) in t1
+    | Call(id, e) -> try (let (dfa_ret, dfa_name, dfa_args, dfa_var_body, dfa_node_body)  = find_dfa
     env.dfa_lookup id in
                 let el_tys = List.map (fun exp -> check_expr env exp) e in
-                let fn_tys = List.map (fun farg-> let (_,ty,_) = get_name_type_from_formal env farg in ty) fargs in
+                let fn_tys = List.map (fun dfa_arg-> let (_,ty,_) =
+                  get_name_type_from_formal env dfa_arg in ty) dfa_args in
                 if not (el_tys = fn_tys) then
                     raise (Error("Mismatching types in function call")) else
-                    fret)
+                    dfa_ret)
             with Not_found ->
                 raise (Error("Undeclared Function "))
   
@@ -206,6 +213,7 @@ let rec get_sexpr env e = match e with
       get_sexpr env ex,check_expr env e)
       | Pop(id) -> SPop(SIdent(id, get_node_scope env id), check_expr env e)
       | Peek(id) -> SPeek(SIdent(id, get_node_scope env id), check_expr env e)
+      | EosLit -> SEosLit
 
 let get_sval env = function
     ExprVal(expr) -> SExprVal(get_sexpr env expr)
@@ -223,7 +231,6 @@ let get_sdecl env decl =
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
         (SVarAssignDecl(datatype, SIdent(ident, NodeScope), sv), env)
-      | _ -> raise(Error("Variable already declared"))
 (*    if Not_found then match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
         | VarAssignDecl(datatype, ident, value) -> 
@@ -287,15 +294,19 @@ let empty_table_initialization = {parent=None; variables =[];}
 let empty_dfa_table_initialization = {
     dfas=[
     (*The state() function to get states of concurrently running dfas*)
-        (Datatype(String), Ident("state"), [Formal(Datatype(String),Ident("dfa"))],[]);
+        (Datatype(String), Ident("state"),
+        [Formal(Datatype(String),Ident("dfa"))],[], []);
     (*The built-in print function (only prints strings)*)
-        (Datatype(Void), Ident("print"), [Formal(Datatype(String),Ident("str"))],[]);
+        (Datatype(Void), Ident("print"),
+        [Formal(Datatype(String),Ident("str"))],[], []);
     (*The built-in sleep function*)
-        (Datatype(Void), Ident("sleep"), [Formal(Datatype(Int),Ident("ms"))],[]);
+        (Datatype(Void), Ident("sleep"), [Formal(Datatype(Int),Ident("ms"))],[],
+        []);
     (*The built-in int-to-string conversion function*)
-        (Datatype(String), Ident("itos"), [Formal(Datatype(Int),Ident("int"))],[]);
+        (Datatype(String), Ident("itos"),
+        [Formal(Datatype(Int),Ident("int"))],[], []);
     (*The built-in concurrent string*)
-        (Stacktype(Datatype(String)), Ident("concurrent"), [] ,[]) (*how to
+        (Stacktype(Datatype(String)), Ident("concurrent"), [] ,[], []) (*how to
         check formals*)
     ]}
 let empty_environment = {return_type = Datatype(Void); return_seen = false;
@@ -395,6 +406,25 @@ let get_sstmt_list env stmt_list =
         let (sstmt, new_env) = check_stmt env stmt in 
         (sstmt::sstmt_list, new_env)) ([],env) stmt_list
 
+let get_svar_list env var_list = 
+     List.fold_left (fun (svar_list,env) var -> 
+        let stmt = match var with
+        decl -> Ast.Declaration(var)
+        (*| _ -> raise(Error("Non-Declaration in the Variable Body"))*)
+        in
+        let (svar, new_env) = check_stmt env stmt in 
+        (svar::svar_list, new_env)) ([],env) var_list
+
+let get_snode_body env node_list =
+  List.fold_left (fun (snode_list, env) raw_node ->
+  match raw_node with
+        Node((Ident(name), node_stmt_list)) ->
+          let node_block = Block(node_stmt_list) in
+          let (snode_block, new_env) = check_stmt env node_block in
+          (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list, new_env)
+        (*| _ -> raise(Error("Improperly formatted state"))*)
+  ) ([],env) node_list
+
 (* add a dfa to the environment*)
 let add_dfa env sdfa_decl =
     let dfa_table = env.dfa_lookup in
@@ -404,8 +434,10 @@ let add_dfa env sdfa_decl =
             let dfa_name = sdfastr.sdfaname in
             let dfa_type = get_type_from_datatype sdfastr.sreturn in
             let dfa_formals = sdfastr.sformals in
-            let dfa_body = sdfastr.sbody in
-            let new_dfas = (Datatype(dfa_type), dfa_name, dfa_formals, dfa_body)::old_dfas in
+            let dfa_var_body = sdfastr.svar_body in
+            let dfa_node_body = sdfastr.snode_body in
+            let new_dfas = (Datatype(dfa_type), dfa_name, dfa_formals,
+            dfa_var_body, dfa_node_body)::old_dfas in
             let new_dfa_lookup = {dfas = new_dfas} in
             let final_env = {env with dfa_lookup = new_dfa_lookup} in
             final_env
@@ -417,19 +449,23 @@ let check_dfa env dfa_declaration =
         Some(env.node_scope)*); variables = new_locals;} in
     let new_env = {return_type = dfa_declaration.return; return_seen=false; location="in_dfa"; node_scope = new_node_scope; dfa_lookup = env.dfa_lookup} in
     (* let final_env  =List.fold_left(fun env stmt -> snd (check_stmt env stmt)) new_env func_declaration.body in *)
-    let (typed_statements, final_env) = get_sstmt_list new_env dfa_declaration.body in
-    let _=check_final_env final_env in
+    let (global_var_decls, penultimate_env) = get_svar_list new_env
+    dfa_declaration.var_body in
+    let (checked_node_body, final_env) = get_snode_body new_env
+    dfa_declaration.node_body in
+    let _ =check_final_env final_env in
     let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =
-        dfa_declaration.dfaname; sformals = dfa_declaration.formals; sbody =
-            typed_statements}) in
-    (SDfa_Decl(sdfadecl,dfa_declaration.return), env) 
+        dfa_declaration.dfa_name; sformals = dfa_declaration.formals; svar_body =
+          global_var_decls; snode_body = checked_node_body}) in
+    (SDfa_Decl(sdfadecl,dfa_declaration.return), env)
+
 
 let initialize_dfas env dfa_list = 
     let (typed_dfa,last_env) = List.fold_left
         (fun (sdfadecl_list,env) dfa-> let (sdfadecl, _) = check_dfa env dfa in 
-                                       let final_env = add_dfa env sdfacdecl in                                       
+                                       let final_env = add_dfa env sdfadecl in
                                        (sdfadecl::sdfadecl_list, final_env))
-                                       ([],env) dfa_list in (typed_dfas,last_env)
+                                       ([],env) dfa_list in (typed_dfa,last_env)
 
 (*Semantic checking on a program*)
 let check_program program =
@@ -439,5 +475,3 @@ let check_program program =
     let (typed_globals, new_env2) = List.fold_left(fun (new_globals,env)
              globals -> initialize_globals (new_globals, env) globals) ([], new_env) globals in
     Prog(typed_dfas, (typed_globals))
-             
-

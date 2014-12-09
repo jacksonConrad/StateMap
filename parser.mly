@@ -18,7 +18,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %right NOT
-%right UMINUS DEC INC /*TODO HOW TO MAKE DEC/INC BIND LEFT AND RIGHT!? AND IN WHAT PRECEDENCE???*/
+%right UMINUS DEC INC
 %left PUSH POP PEEK
 %nonassoc LPAREN RPAREN LBRAC RBRAC
 
@@ -41,10 +41,11 @@ ret_type:
     var_type {Datatype($1)} |
     STACK LT var_type GT {Stacktype(Datatype($3))}
 
+    
 dfa_decl:
     ret_type DFA ID LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE
     { { return = $1;
-    fname = Ident($3);
+    dfa_name = Ident($3);
     formals = $5;
     var_body = $8; 
     node_body = $9}} 

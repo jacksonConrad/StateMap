@@ -1,5 +1,7 @@
 type var_type = Int | String | Stack | Double | Void
 
+type eostype = Eos
+
 type binop = Add | Sub | Mult | Div | Mod | Equal | Neq | And | Or| Lt | Leq | Gt | Geq
 type unop = Inc | Dec | Not | Neg
 
@@ -8,7 +10,8 @@ type ident =
 
 type datatype = 
     Datatype of var_type | (* Possible type for concurrent DFA return stack*)
-    Stacktype of datatype
+    Stacktype of datatype|
+    Eostype of eostype
 
 type expr = 
     IntLit of int | 
@@ -48,7 +51,7 @@ type node =
 
 type dfa_decl = {
     return : datatype;
-    fname: ident;
+    dfa_name: ident;
     formals : formal list;
     var_body : decl list;
     node_body : node list;
@@ -89,7 +92,7 @@ let rec stmt_s = function
  | While(e, s) -> "While (" ^ expr_s e ^ ") (" ^ stmt_s s ^ ")"
 
 let func_decl_s f =
-  " { fname = \"" ^ f.fname ^ "\"\n   formals = [" ^
+  " { dfa_name = \"" ^ f.dfa_name ^ "\"\n   formals = [" ^
   String.concat ", " f.formals ^ "]\n   locals = [" ^
   String.concat ", " f.locals ^ "]\n   body = ["  ^
   String.concat ",\n" (List.map stmt_s f.body) ^
@@ -138,6 +141,9 @@ let rec string_of_datatype = function
       | Void -> "Void"
     )
   | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
+  | Eostype(Eos) -> "EOS"
+
+
 
 let string_of_decl = function
     VarDecl(dt, id) -> string_of_datatype dt ^ " " ^ string_of_ident id
@@ -175,7 +181,7 @@ let string_of_formal = function
 (* let string_of_vdecl id = "int " ^ id ^ ";\n" *)
 
 let string_of_dfadecl dfadecl =
-  string_of_datatype dfadecl.return ^ " " ^ string_of_ident dfadecl.fname ^ "(" ^ String.concat ", " (List.map string_of_formal dfadecl.formals) ^ ")\n{\n" ^
+  string_of_datatype dfadecl.return ^ " " ^ string_of_ident dfadecl.dfa_name ^ "(" ^ String.concat ", " (List.map string_of_formal dfadecl.formals) ^ ")\n{\n" ^
   String.concat "" (List.map string_of_decl dfadecl.var_body) ^
   String.concat "" (List.map string_of_node dfadecl.node_body) ^
   "}\n"
