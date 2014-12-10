@@ -28,24 +28,24 @@ let rec find_dfa (dfa_lookup: dfa_table) name =
     List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas
 
 let basic_math t1 t2 = match (t1, t2) with
-    (Double, Int) -> (Double, true)
-    | (Int, Double) -> (Double, true)
+    (Float, Int) -> (Float, true)
+    | (Int, Float) -> (Float, true)
     | (Int, Int) -> (Int, true)
-    | (Double, Double) -> (Int, true)
+    | (Float, Float) -> (Int, true)
     | (_,_) -> (Int, false)
 
 let relational_logic t1 t2 = match (t1, t2) with
     (Int,Int) -> (Int,true)
-    | (Double,Double) -> (Int,true)
-    | (Int,Double) -> (Int,true)
-    | (Double,Int) -> (Int,true)
+    | (Float,Float) -> (Int,true)
+    | (Int,Float) -> (Int,true)
+    | (Float,Int) -> (Int,true)
     | (_,_) -> (Int, false) 
 
 let equal_logic t1 t2 = match(t1,t2) with
     (Int,Int) -> (Int,true)
-    | (Double,Double) -> (Int,true)
-    | (Int,Double) -> (Int,true)
-    | (Double,Int) -> (Int,true)
+    | (Float,Float) -> (Int,true)
+    | (Int,Float) -> (Int,true)
+    | (Float,Int) -> (Int,true)
     | (String,String) -> (Int,true)
     | (_,_) -> (Int,false) 
 
@@ -148,7 +148,7 @@ let pop env stack =
 (*Semantic checking on expressions*)
 let rec check_expr env e = match e with
     IntLit(i) ->Datatype(Int)
-    | DoubleLit(f) -> Datatype(Double)
+    | FloatLit(f) -> Datatype(Float)
     | StringLit(s) -> Datatype(String)
     | EosLit -> Eostype(Eos)
     | Variable(v) -> 
@@ -158,7 +158,7 @@ let rec check_expr env e = match e with
     | Unop(u, e) -> 
         let t = check_expr env e in 
         (match u with
-             _ -> if t = Datatype(Int) then t else if t = Datatype(Double) then t 
+             _ -> if t = Datatype(Int) then t else if t = Datatype(Float) then t 
                         else
                             raise (Error("Cannot perform operation on " )))
     | Binop(e1, b, e2) -> 
@@ -200,7 +200,7 @@ let get_node_scope env name =
 (*converts expr to sexpr*)
 let rec get_sexpr env e = match e with
       IntLit(i) -> SIntLit(i, Datatype(Int))
-      | DoubleLit(d) -> SDoubleLit(d,Datatype(Double))
+      | FloatLit(d) -> SFloatLit(d,Datatype(Float))
       | StringLit(s) -> SStringLit(s,Datatype(String))
       | Variable(id) -> SVariable(SIdent(id, get_node_scope env id), check_expr env e)
       | Unop(u,ex) -> SUnop(u, get_sexpr env ex, check_expr env e)
@@ -271,9 +271,9 @@ let add_to_global_table env name t v =
 (* check both sides of an assignment are compatible*) 
 let check_assignments type1 type2 = match (type1, type2) with
     (Int, Int) -> true
-    |(Double, Double) -> true
-    |(Int, Double) -> true
-    |(Double, Int) -> true
+    |(Float, Float) -> true
+    |(Int, Float) -> true
+    |(Float, Int) -> true
     |(String, String) -> true
     |(_,_) -> false
 

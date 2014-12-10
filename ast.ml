@@ -1,4 +1,4 @@
-type var_type = Int | String | Stack | Double | Void
+type var_type = Int | String | Stack | Float | Void
 
 type eostype = Eos
 
@@ -16,7 +16,7 @@ type datatype =
 type expr = 
     IntLit of int | 
     StringLit of string |
-    DoubleLit of float  |
+    FloatLit of float  |
     EosLit |
     Variable of ident |
     Unop of unop * expr |
@@ -41,7 +41,8 @@ type stmt =
     Assign of ident * expr |
     (*TransWrapper of expr | Why do we have this????*)
     Transition of ident * expr |
-    Return of expr
+    Return of expr |
+    VarAssign of ident * value
 
 type formal = 
     Formal of datatype * ident
@@ -110,7 +111,7 @@ let string_of_ident = function
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
   | StringLit(l) -> l
-  | DoubleLit(l) -> string_of_float l
+  | FloatLit(l) -> string_of_float l
   | Variable(id) -> string_of_ident id 
   | Unop(o, e) -> 
       string_of_expr e ^ " " ^ 
@@ -137,7 +138,7 @@ let rec string_of_expr = function
 let rec string_of_datatype = function
   Datatype(vartype) -> 
     (match vartype with 
-      Int -> "int" | String -> "String" | Stack -> "Stack" | Double -> "Double"
+      Int -> "int" | String -> "String" | Stack -> "Stack" | Float -> "Float"
       | Void -> "Void"
     )
   | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
@@ -166,6 +167,9 @@ let rec string_of_stmt = function
   (* | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s *)
   | Declaration(decl) -> string_of_decl decl
   | Transition(id, expr) -> string_of_ident id ^ " <- (" ^ string_of_expr expr ^ ")"
+  | VarAssign(id, value) -> string_of_ident id ^ " = " ^ (match value with 
+      ExprVal(e) -> string_of_expr e)
+
 
 
 
