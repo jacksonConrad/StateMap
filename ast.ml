@@ -119,7 +119,7 @@ let rec string_of_expr = function
         Inc -> "++" |
         Dec -> "--" |
         Not -> "!"  |
-        Neg -> "neg?")
+        Neg -> "-")
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
