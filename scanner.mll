@@ -32,7 +32,7 @@ rule token =
 | ">="     { GEQ }
 | "return" { RETURN }
 | "int"    { INT }
-| "double" { DOUBLE }
+| "float"  { FLOAT }
 | "string" { STRING }
 | "void"   { VOID }
 | "DFA"    { DFA }
