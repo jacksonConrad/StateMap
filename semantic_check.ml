@@ -474,4 +474,4 @@ let check_program program =
     let (typed_dfas, new_env) = initialize_dfas env dfas in
     let (typed_globals, new_env2) = List.fold_left(fun (new_globals,env)
              globals -> initialize_globals (new_globals, env) globals) ([], new_env) globals in
-    Prog(typed_dfas, (typed_globals))
+    Prog(typed_dfas)

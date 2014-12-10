@@ -54,4 +54,4 @@ type sdfa_decl =
 	SDfa_Decl of sdfastr * datatype
 
 type sprogram = 
-  Prog of sdfa_decl list * sdecl list
+  Prog of sdfa_decl list
