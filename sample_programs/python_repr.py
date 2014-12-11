@@ -117,7 +117,7 @@ class main:
         else:
             #concurrent(dfa1,dfa2,dfa2)
             dfasToRun = [dfa1(), dfa2(), dfa3()]
-            while not arg1.returnIt or not arg2.returnIt or not arg3.returnIt:
+            while not all(dfa.returnIt is None for dfa in dfasToRun): 
                 for dfa in dfasToRun:
                     dfa.now()
                 for dfa in dfasToRun:
@@ -126,8 +126,15 @@ class main:
             self.nexT = self.quit
 
     def state3(self):
-        i = dfa2().returnIt
-        return "moreThanFuckAll" + i
+        dfasToRun = [dfa2()]
+        #set up like concurrency but simpler
+        while not all(dfa.returnIt is None for dfa in dfasToRun):
+            for dfa in dfasToRun:
+                dfa.now()
+            for dfa in dfasToRun:
+                dfa.now = dfa.nexT
+        
+        return "moreThanFuckAll" + arg
 
 
 
