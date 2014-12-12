@@ -85,7 +85,7 @@ let rec gen_sexpr sexpr = match sexpr with
     gen_tabs (tabs+1) ^ "for dfa in (dfasToRun - finishedDfas):\n" ^
     gen_tabs (tabs+2) ^ "dfa.__class__.now = dfa.nexT\n" ^ 
     gen_tabs (tabs+2) ^ "if dfa.returnIt is not None: finishedDfas.add(dfa)\n"
-    | itoa -> "str("^ gen_sexpr_list sexpr_list ^")\n"
+    | itos -> "str("^ gen_sexpr_list sexpr_list ^")\n"
     | _ -> let dfaname = gen_sident_name sident in 
     gen_tabs tabs ^ dfaname ^ "temp = " ^ gen_sid sident ^ "(" ^ gen_sexpr_list sexpr_list ^ ")\n" ^
     gen_tabs tabs ^ "while " ^ dfaname ^ "temp.returnIt is None:\n" ^
@@ -262,13 +262,14 @@ let gen_main = function
 *)
 
 let gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
-    [] -> ""
-| h::[] -> "self." ^ gen_sstmt h tabs
-| h::t -> "self." ^ gen_sstmt h tabs ^ gen_dfascope_VarDecls t tabs
+     [] -> ""
+| h::[] -> "self." ^ gen_sstmt h tabs ^ "\n"
+| h::t -> "self." ^ gen_sstmt h tabs ^ "\n" ^ gen_dfascope_VarDecls t tabs
 
 let gen_sdfa_str sdfa_str =
   "class " gen_id sdfa_str.sdfaname ^ ":\n" ^
-  gen_tabs 1 ^"def __init__(self, " ^ gen_formal_list sdfa_str.sformals ^ "):\n" ^
+  gen_tabs 1 ^ "def __init__(self, " ^ gen_formal_list sdfa_str.sformals ^ "):\n" ^
+  gen_tabs 2 ^ "self.returnType = " ^ get_type_from_datatype sdfa_str.sreturn ^ "\n" ^
   gen_dfascope_VarDecls sdfa_str.svar_body 2 ^
   gen_node_list sdfa_str.snode_body (*TODO need to do gen_node_list*)
 
