@@ -3,7 +3,28 @@ open Sast
 open Printf
 
 let py_main =
-    "if __name__ == '__main__':
+    "
+    import sleep from time
+
+    def concurrent(*dfasNArgs):
+        dfas = dfa(dfasNArgs[i*2+1]) for i,dfa in enumerate(dfasNArgs[::2])
+        finishedDfas = set()
+        while len(set(dfas) - finishedDfas):
+            for dfa in (set(dfas) - finishedDfas):
+                dfa.__class__.now()
+            for dfa in (set(dfas) - finishedDfas):
+                dfa.__class__.now = dfa.nexT
+            finishedDfas = set([dfa if dfa.returnVal is not None for dfa in dfas])
+        return [dfa.returnVal for dfa in dfas]
+
+    def callDfa(dfaClass, *args):
+        dfaInstance = dfaClass(args)
+        while dfaInstance.returnVal is None:
+            dfaClass.now()
+            dfaClass.now = dfaInstance.nexT
+        return dfaInstance.returnVal
+    
+    if __name__ == '__main__':
         topDfa = mainDFA()
     "
 
@@ -15,6 +36,7 @@ let return = "return"
 let gen_id = function
   Ident(id) -> id
 
+(*WHY DO WE HAVE gen_sid and get_sident_name*)
 let gen_sid = function
   SIdent(id,dt) -> id
 
@@ -23,14 +45,13 @@ let rec gen_tabs n = match n with
   | _ -> "\t"^gen_tabs (n-1)
 
 let get_sident_name = function
-  SIdent(id, scope) -> id
+  SIdent(id, scope) -> if scope == DFAScope then "self." ^ id 
+                        else id
 
 
 let gen_unop = function
   Neg -> "-"
-| Inc -> "++"
-| Dec -> "--"
-| Not -> "!"
+| Not -> "not "
 
 let gen_binop = function
   Add -> "+"
@@ -48,10 +69,7 @@ let gen_binop = function
 | Or -> "or"
 
 let gen_var_type = function
-  Int -> ""
-| Float -> ""
-| String -> ""
-| Void -> ""
+    _ -> ""
 
 (* let rec gen_datatype = function
   Datatype(var_type) -> gen_var_type var_type
@@ -69,39 +87,34 @@ let rec gen_sexpr sexpr = match sexpr with
   SIntLit(i, d) -> string_of_int i
 | SFloatLit(f, d) -> string_of_float f
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
-| SVariable(sident, d) -> sident
+| SVariable(sident, d) -> get_sident_name sident
 | SUnop(unop, sexpr, d) -> unop ^ "(" ^ gen_sexpr sexpr ^ ")"
 | SBinop(sexpr1, binop, sexpr2, d) -> gen_sexpr sexpr1 ^ gen_binop binop ^
     gen_sexpr sexpr2 
-| SExprAssign(sident, sexpr, d) -> sident ^ " = " ^ gen_sexpr sexpr 
+| SExprAssign(sident, sexpr, d) -> get_sident_name sident ^ " = " ^ gen_sexpr sexpr 
 | SCall(sident, sexpr_list, d) -> match get_sident_name sident with
-    print -> gen_tabs tabs ^ "print" ^ print_sexpr_list sexpr_list
-    | sleep -> gen_tabs tabs "time.sleep(" ^ gen_sexpr_list sexpr_list ^ ")\n"
-    | concurrent -> gen_tabs tabs ^ "dfasToRun = set([" ^ gen_sexpr_list sexpr_list ^ "])\n"^ 
-    gen_tabs tabs ^ "finishedDfas = set()\n" ^ 
-    gen_tabs tabs ^ "while len(dfasToRun - finishedDfas):\n" ^ 
-    gen_tabs (tabs+1) ^ "for dfa in (dfasToRun - finishedDfas):\n" ^
-    gen_tabs (tabs+2) ^ "dfa.__class__.now()\n" ^ 
-    gen_tabs (tabs+1) ^ "for dfa in (dfasToRun - finishedDfas):\n" ^
-    gen_tabs (tabs+2) ^ "dfa.__class__.now = dfa.nexT\n" ^ 
-    gen_tabs (tabs+2) ^ "if dfa.returnIt is not None: finishedDfas.add(dfa)\n"
-    | itos -> "str("^ gen_sexpr_list sexpr_list ^")\n"
-    | _ -> let dfaname = gen_sident_name sident in 
-    gen_tabs tabs ^ dfaname ^ "temp = " ^ gen_sid sident ^ "(" ^ gen_sexpr_list sexpr_list ^ ")\n" ^
-    gen_tabs tabs ^ "while " ^ dfaname ^ "temp.returnIt is None:\n" ^
-    gen_tabs (tabs+1) ^ dfaname ^ "temp.__class__.now()\n" ^
-    gen_tabs (tabs+1) ^ dfaname ^ "temp.__class__.now = " ^ dfaname ^ "temp.nexT\n"
-
+    print -> gen_tabs tabs ^ "print(" ^ print_sexpr_list sexpr_list ^ ")"
+    
+    | sleep -> gen_tabs tabs "time.sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
+    
+    | itos -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
+    
+    | concurrent -> gen_tabs tabs ^ "concurrent(" ^ gen_sexpr_list sexpr_list ^")" 
+    (*What if concurrency looked like this:
+        * concurrent(dfa,args,dfa2,args2,dfa3,args3,...)???*)
+    
+    | _ -> let dfaname = gen_sident_name sident in
+    gen_tabs tabs ^ "callDfa(" ^ get_sid sident ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
 
 and gen_sstmt sstmt tabs = match sstmt with
   SBlock(sstmt_list) ->  gen_sstmt_list sstmt_list tabs
 | SSExpr(sexpr) -> gen_tabs tabs ^ gen_sexpr sexpr ^ "\n"
-| SReturn(sexpr) -> gen_tabs tabs ^ "self.returnIt =  " ^ gen_sexpr sexpr ^ "\n"
+| SReturn(sexpr) -> gen_tabs tabs ^ "self.returnVal =  " ^ gen_sexpr sexpr ^ "\n"
 | SDeclaration(sdecl) -> ""
 | SAssign(sident, sexpr) -> gen_tabs tabs ^ gen_sid sident ^ " = " ^
    gen_sexpr sexpr ^ "\n"
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
-    gen_tabs (tabs+1) ^ "self.nexT = " ^ gen_sid sident ^ "\n"
+    gen_tabs (tabs+1) ^ "self.nexT = self." ^ gen_sid sident ^ "\n"
 
 (*gen_sdecl only appears within time blocks, VarDecls are ignored*)
 and gen_sdecl sdecl lcl_prefix = match sdecl with
@@ -266,11 +279,31 @@ let gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
 | h::[] -> "self." ^ gen_sstmt h tabs ^ "\n"
 | h::t -> "self." ^ gen_sstmt h tabs ^ "\n" ^ gen_dfascope_VarDecls t tabs
 
+let rec get_type_from_datatype = function
+    Datatype(t) -> t
+    | Stacktype(ty) -> get_type_from_datatype ty
+    | Eostype(Eos) -> "Eos"
+
+let gen_unpacked_formal_list sformals index tabs = match sformals with
+    [] -> ""
+    |Formal(dt,id)::rst -> gen_tabs tabs ^ gen_sid id ^ "= args[" ^
+    string_of_int index ^ "]\n" ^ gen_unpacked_formal_list rst (index+1) tabs
+
+
 let gen_sdfa_str sdfa_str =
-  "class " gen_id sdfa_str.sdfaname ^ ":\n" ^
-  gen_tabs 1 ^ "def __init__(self, " ^ gen_formal_list sdfa_str.sformals ^ "):\n" ^
-  gen_tabs 2 ^ "self.returnType = " ^ get_type_from_datatype sdfa_str.sreturn ^ "\n" ^
+  "class " gen_sid sdfa_str.sdfaname ^ ":\n" ^
+  (*gen_tabs 1 ^ "def __init__(self," ^ gen_formal_list sdfa_str.sformals ^ "):\n" ^*)
+  gen_tabs 1 ^ "def __init__(self,*args):\n" ^
+  gen_unpacked_formal_list sdfa_str.sformals 0 2 ^
+  gen_tabs 2 ^ "self.returnVal = None\n" ^
+  gen_tabs 2 ^ (gen_sid sdfa_str.sdfaname) ^".now = start\n" ^
+  gen_tabs 2 ^ "self.nexT = None\n" ^
   gen_dfascope_VarDecls sdfa_str.svar_body 2 ^
+  if (gen_sid sdfa_str.dfaname) == "mainDFA" then 
+      gen_tabs 2 ^ "while self.returnVal is None:\n" ^
+      gen_tabs 3 ^ "mainDFA.now()\n" ^
+      gen_tabs 3 ^ "mainDFA.now = self.nexT\n"
+  gen_tabs 2 ^ "return" ^
   gen_node_list sdfa_str.snode_body (*TODO need to do gen_node_list*)
 
 let gen_sdfa_decl = function
