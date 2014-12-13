@@ -431,12 +431,27 @@ let get_snode_body env node_list =
             let transCatchAllList = List.filter( function
                 Transition(_,IntLit(1)) -> true
                 | _ -> false) node_stmt_list in
-            if transCatchAllList != [] then
-                let node_block = Block(node_stmt_list) in
-                let (snode_block, new_env) = check_stmt env node_block in
-                (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list,
-                new_env)
-          else raise(Error("No catch all"))
+            let transList = List.filter( function
+                Transition(_,_) -> true
+                | _ -> false) node_stmt_list in
+            let retList = List.filter (function
+              Return(_) -> true
+                | _ -> false) node_stmt_list in
+            if retList != [] && transList != [] then
+              raise(Error("Return statements and Transitions are
+                           mutually exclusive")) 
+            else
+              let block = 
+                  let node_block = Block(node_stmt_list) in
+                  let (snode_block, new_env) = check_stmt env node_block in
+                  (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list,
+                  new_env) in
+              if retList == [] then
+                if transCatchAllList != [] then
+                  block
+                else raise(Error("No catch all"))
+              else
+                block
   ) ([],env) node_list
 
 (* add a dfa to the environment*)

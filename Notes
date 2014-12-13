@@ -10,3 +10,7 @@ check for name collisions when making dfas ... DONE
 check for start state within a  node...DONE
 
 check for transitions...DONE
+
+return/transition mutually exclusive ... DONE
+
+return or catch all ... DONE
