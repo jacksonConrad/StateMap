@@ -1,0 +1,8 @@
+void DFA main()							
+{
+    init
+    {
+        return 3;
+    }
+    
+}
