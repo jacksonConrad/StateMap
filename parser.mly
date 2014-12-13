@@ -1,7 +1,7 @@
 %{ open Ast %}
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA RBRAC LBRAC COLON DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN STAR PUSH POP PEEK
-%token NOT INC DEC
+%token NOT
 %token EQ NEQ LT LEQ GT GEQ OR AND MOD
 %token RETURN TRANS
 %token DFA STACK
@@ -18,7 +18,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %right NOT
-%right UMINUS DEC INC
+%right UMINUS
 %left PUSH POP PEEK
 %nonassoc LPAREN RPAREN LBRAC RBRAC
 
@@ -76,7 +76,7 @@ stmt:
 	| ID TRANS expr SEMI {Transition(Ident($1),$3)} 
 	| ID TRANS STAR SEMI {Transition(Ident($1),IntLit(1))} /*Note expr = 1 here since eval( * )==TRUE*/
 	| vdecl {Declaration($1)}
-  | ID ASSIGN expr SEMI { Assign(Ident($1), ExprAssign(Ident($1), $3)) } /*Assignment post-declaration*/
+  | ID ASSIGN expr SEMI { Assign(Ident($1), $3) } /*Assignment post-declaration*/
 	| expr SEMI {Expr($1)}
 
 formals_opt:
@@ -114,8 +114,6 @@ expr:
   | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or ,   $3) }
-  | INC expr         { Unop(Inc, $2) (*Unop(PreInc, $1)*) }
-  | DEC expr         { Unop(Dec, $2) (*Unop(PreDec, $1)*) }
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }

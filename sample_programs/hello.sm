@@ -1,0 +1,8 @@
+DFA main (stack<string> main)							
+{
+	start											
+	{
+		print ("Hello World");
+		return;
+	}
+}

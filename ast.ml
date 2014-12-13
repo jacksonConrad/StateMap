@@ -21,7 +21,7 @@ type expr =
     Variable of ident |
     Unop of unop * expr |
     Binop of expr * binop * expr |
-    ExprAssign of ident * expr |
+    (* ExprAssign of ident * expr | *)
     Call of ident * expr list |
     Push of ident * expr |
     Pop of ident |
@@ -126,7 +126,7 @@ let rec string_of_expr = function
       | Equal -> "==" | Neq -> "!=" | Mod -> "%"
       | Lt -> "<" | Leq -> "<=" | Gt -> ">" | Geq -> ">=" | And -> "&&" | Or -> "||" ) ^ " " ^
       string_of_expr e2
-  | ExprAssign(id, e) -> string_of_ident id ^ " " ^ string_of_expr e
+  (* | ExprAssign(id, e) -> string_of_ident id ^ " " ^ string_of_expr e *)
   | Call(id, e_list) -> string_of_ident id ^ " " ^ 
       "(" ^ String.concat ", " (List.map string_of_expr e_list) ^ ")"
   | Push(id, e) -> string_of_ident id ^ " " ^ string_of_expr e 

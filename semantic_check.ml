@@ -170,10 +170,10 @@ let rec check_expr env e = match e with
         let (t, valid) = get_binop_return_value b t1 t2 in
         if valid || e1 = EosLit || e2 = EosLit 
         then t else raise(Error("Incompatible types with binary operator"));
-    | ExprAssign(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
+    (* | ExprAssign(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
         in (if not (t1 = t2) then (raise (Error("Mismatch in types for
-        assignment")))); t2 (*check_expr env e*)
+        assignment")))); t2  *)(*check_expr env e*)
     | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
         in (if not (t1 = t2) then (raise (Error("Mismatch in types for
@@ -209,8 +209,8 @@ let rec get_sexpr env e = match e with
       | Variable(id) -> SVariable(SIdent(id, get_node_scope env id), check_expr env e)
       | Unop(u,ex) -> SUnop(u, get_sexpr env ex, check_expr env e)
       | Binop(e1,b,e2) -> SBinop(get_sexpr env e1,b, get_sexpr env e2,check_expr env e)
-      | ExprAssign(id,ex) -> SExprAssign(SIdent(id, get_node_scope env id),
-      get_sexpr env ex,check_expr env e) 
+     (*  | ExprAssign(id,ex) -> SExprAssign(SIdent(id, get_node_scope env id),
+      get_sexpr env ex,check_expr env e)  *)
       | Call(id, ex_list) -> let s_ex_list = List.map(fun exp -> get_sexpr env
       exp) ex_list in SCall(SIdent(id,DFAScope),s_ex_list, check_expr env e) 
       | Push(id, ex) -> SPush(SIdent(id, get_node_scope env id),
