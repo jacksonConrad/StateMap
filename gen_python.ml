@@ -83,6 +83,17 @@ let rec gen_plain_datatype = function
 let gen_formal formal = match formal with
   Formal(datatype, id) -> gen_id id
 
+let gen_concurrency_list sexpr_list = match sexpr_list with
+ [] -> ""
+| h::[] -> gen_concurrent_dfa h 
+| h::t -> gen_concurrent_dfa h ^ ", " ^ gen_concurrency_list t
+
+let gen_concurrent_dfa sexpr = match sexpr with
+ [] -> ""
+|SCall(sident,sexpr_list,d) -> get_sid sident ^ ", [" ^
+    gen_sexpr_list sexpr_list ^ "]"
+
+
 let rec gen_sexpr sexpr = match sexpr with
   SIntLit(i, d) -> string_of_int i
 | SFloatLit(f, d) -> string_of_float f
@@ -93,18 +104,16 @@ let rec gen_sexpr sexpr = match sexpr with
     gen_sexpr sexpr2 
 | SExprAssign(sident, sexpr, d) -> get_sident_name sident ^ " = " ^ gen_sexpr sexpr 
 | SCall(sident, sexpr_list, d) -> match get_sident_name sident with
-    print -> gen_tabs tabs ^ "print(" ^ print_sexpr_list sexpr_list ^ ")"
+    print -> "print(" ^ print_sexpr_list sexpr_list ^ ")"
     
-    | sleep -> gen_tabs tabs "time.sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
+    | sleep -> "time.sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | itos -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
     
-    | concurrent -> gen_tabs tabs ^ "concurrent(" ^ gen_sexpr_list sexpr_list ^")" 
-    (*What if concurrency looked like this:
-        * concurrent(dfa,args,dfa2,args2,dfa3,args3,...)???*)
+    | concurrent -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
     
     | _ -> let dfaname = gen_sident_name sident in
-    gen_tabs tabs ^ "callDfa(" ^ get_sid sident ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
+    "callDfa(" ^ get_sid sident ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
 
 and gen_sstmt sstmt tabs = match sstmt with
   SBlock(sstmt_list) ->  gen_sstmt_list sstmt_list tabs
@@ -274,6 +283,8 @@ let gen_main = function
   gen_always_linker_list always_link_l
 *)
 
+
+let gen_node_list snode_body = 
 let gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
      [] -> ""
 | h::[] -> "self." ^ gen_sstmt h tabs ^ "\n"
