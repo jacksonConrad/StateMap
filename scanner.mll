@@ -19,8 +19,6 @@ rule token =
 | '%'      { MOD }
 | '='      { ASSIGN }
 | "=="     { EQ }
-| "++"	   { INC }
-| "--"	   { DEC }
 | '!'      { NOT }
 | "!="     { NEQ }
 | "&&"     { AND }
