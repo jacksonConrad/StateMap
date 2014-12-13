@@ -13,18 +13,22 @@ type dfa_table = {
     dfas: (datatype * ident * formal list * sstmt list * snode list) list
 } (*Jacked sstmt from Slang. Did NOT use stmt. sstmt is defined in sast*)
 
+type node_table = {
+    parent1: string;
+    node: string;
+}
+
 type translation_environment = {
     return_type: datatype;
     return_seen: bool; 
     location: string; (*Which DFA we're in*)
     node_scope: symbol_table; (*Scope of current node*)
-   (* node_lookup: string list;*)
-    (*dfa_scope: symbol_table; (*Scope of current DFA*)*)
+    (*node_lookup: node_table; (*list of all the nodes*)*)
     dfa_lookup: dfa_table; (*Table of all DFAs*)
 }
 
 (* search for a function in our function table*)
-let rec find_dfa (dfa_lookup: dfa_table) name = 
+let find_dfa (dfa_lookup: dfa_table) name =
     List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas
 
 let basic_math t1 t2 = match (t1, t2) with
@@ -164,8 +168,8 @@ let rec check_expr env e = match e with
     | Binop(e1, b, e2) -> 
         let t1 = check_expr env e1 and t2 = check_expr env e2 in 
         let (t, valid) = get_binop_return_value b t1 t2 in
-        if valid then t else raise(Error("Incompatible types with binary
-        operator"));
+        if valid || e1 = EosLit || e2 = EosLit 
+        then t else raise(Error("Incompatible types with binary operator"));
     | ExprAssign(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
         in (if not (t1 = t2) then (raise (Error("Mismatch in types for
@@ -419,10 +423,13 @@ let get_snode_body env node_list =
   List.fold_left (fun (snode_list, env) raw_node ->
   match raw_node with
         Node((Ident(name), node_stmt_list)) ->
-          let node_block = Block(node_stmt_list) in
-          let (snode_block, new_env) = check_stmt env node_block in
-          (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list, new_env)
-        (*| _ -> raise(Error("Improperly formatted state"))*)
+          let exprStar = Expr(StringLit("*")) in
+          if List.mem exprStar node_stmt_list then
+            let node_block = Block(node_stmt_list) in
+            let (snode_block, new_env) = check_stmt env node_block in
+            (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list,
+            new_env)
+          else raise(Error("No catch all"))
   ) ([],env) node_list
 
 (* add a dfa to the environment*)
@@ -442,36 +449,72 @@ let add_dfa env sdfa_decl =
             let final_env = {env with dfa_lookup = new_dfa_lookup} in
             final_env
 
+let check_for_start node_list =
+  let allNodes = List.fold_left (fun (name_list) raw_node ->
+    match raw_node with
+        Node((Ident(name), node_stmt_list)) ->
+            name::name_list) ([]) node_list
+  in if List.mem "start" allNodes = false then raise(Error("No start state in
+  node"))
+
+let transition_check node_list =
+  let allNodes = List.fold_left (fun (name_list) raw_node ->
+      match raw_node with
+          Node((Ident(name), node_stmt_list)) ->
+              name::name_list) ([]) node_list
+  in let statements = List.map (fun raw_node ->
+    match raw_node with
+      Node((Ident(name), node_stmt_list)) -> 
+        List.map (fun x -> x) node_stmt_list) node_list
+  in let flat = List.flatten statements
+  in let states = List.fold_left (fun (states_list) stmt ->
+    match stmt with
+      Transition(Ident(id), ex) ->
+        id::states_list
+      | _ -> []) ([]) flat
+  in List.map (fun id -> try (List.mem id allNodes) with Not_found ->
+    raise(Error("Invalid state transition")) ) states
+
 (* Semantic checking on a function*)
 let check_dfa env dfa_declaration =
-    let new_locals = List.fold_left(fun a vs -> (get_name_type_from_formal env vs)::a)[] dfa_declaration.formals in
-    let new_node_scope = {parent=env.node_scope.parent(*Why SLANG do this:
-        Some(env.node_scope)*); variables = new_locals;} in
-    let new_env = {return_type = dfa_declaration.return; return_seen=false; location="in_dfa"; node_scope = new_node_scope; dfa_lookup = env.dfa_lookup} in
-    (* let final_env  =List.fold_left(fun env stmt -> snd (check_stmt env stmt)) new_env func_declaration.body in *)
-    let (global_var_decls, penultimate_env) = get_svar_list new_env
-    dfa_declaration.var_body in
-    let (checked_node_body, final_env) = get_snode_body new_env
-    dfa_declaration.node_body in
-    let _ =check_final_env final_env in
-    let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =
-        dfa_declaration.dfa_name; sformals = dfa_declaration.formals; svar_body =
-          global_var_decls; snode_body = checked_node_body}) in
-    (SDfa_Decl(sdfadecl,dfa_declaration.return), env)
-
+  let(_,name,_,_,_) = find_dfa env.dfa_lookup dfa_declaration.dfa_name in
+    if name = dfa_declaration.dfa_name then
+    raise(Error("DFA already declared"))
+    else
+      let new_locals = List.fold_left(fun a vs -> (get_name_type_from_formal env vs)::a)[] dfa_declaration.formals in
+      let new_node_scope = {parent=env.node_scope.parent(*Why SLANG do this:
+          Some(env.node_scope)*); variables = new_locals;} in
+      let new_env = {return_type = dfa_declaration.return; return_seen=false; location="in_dfa"; node_scope = new_node_scope; dfa_lookup = env.dfa_lookup} in
+      let _ = check_for_start dfa_declaration.node_body in
+      let _ = transition_check dfa_declaration.node_body in
+      let (global_var_decls, penultimate_env) = get_svar_list new_env
+      dfa_declaration.var_body in
+      let (checked_node_body, final_env) = get_snode_body new_env
+      dfa_declaration.node_body in
+      let _ =check_final_env final_env in
+      let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =
+          dfa_declaration.dfa_name; sformals = dfa_declaration.formals; svar_body =
+            global_var_decls; snode_body = checked_node_body}) in
+      (SDfa_Decl(sdfadecl,dfa_declaration.return), env)
 
 let initialize_dfas env dfa_list = 
     let (typed_dfa,last_env) = List.fold_left
-        (fun (sdfadecl_list,env) dfa-> let (sdfadecl, _) = check_dfa env dfa in 
+        (fun (sdfadecl_list,env) dfa-> let (sdfadecl, _) = check_dfa env dfa in
                                        let final_env = add_dfa env sdfadecl in
                                        (sdfadecl::sdfadecl_list, final_env))
                                        ([],env) dfa_list in (typed_dfa,last_env)
+
+let check_main env str =
+  let id = Ident(str) in
+    try(find_dfa env.dfa_lookup id)
+    with Not_found -> raise(Error("Need DFA called main"))
 
 (*Semantic checking on a program*)
 let check_program program =
     let (dfas,(globals)) = program in
     let env = empty_environment in
     let (typed_dfas, new_env) = initialize_dfas env dfas in
+    let (_) = check_main new_env "main" in
     let (typed_globals, new_env2) = List.fold_left(fun (new_globals,env)
              globals -> initialize_globals (new_globals, env) globals) ([], new_env) globals in
     Prog(typed_dfas, (typed_globals))

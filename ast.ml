@@ -41,8 +41,7 @@ type stmt =
     Assign of ident * expr |
     (*TransWrapper of expr | Why do we have this????*)
     Transition of ident * expr |
-    Return of expr |
-    VarAssign of ident * value
+    Return of expr 
 
 type formal = 
     Formal of datatype * ident
@@ -157,7 +156,8 @@ let rec string_of_stmt = function
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
-  | Assign(id, expr) -> string_of_ident id ^ " = " ^ string_of_expr expr
+  | Assign(id, expr) -> string_of_ident id ^ " = " ^ string_of_expr expr ^
+  ";\n";
   (* | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s *)
   (* | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^ *)
       (* string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2 *)
@@ -167,8 +167,6 @@ let rec string_of_stmt = function
   (* | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s *)
   | Declaration(decl) -> string_of_decl decl
   | Transition(id, expr) -> string_of_ident id ^ " <- (" ^ string_of_expr expr ^ ")"
-  | VarAssign(id, value) -> string_of_ident id ^ " = " ^ (match value with 
-      ExprVal(e) -> string_of_expr e)
 
 
 
