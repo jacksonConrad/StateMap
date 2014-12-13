@@ -106,7 +106,7 @@ let rec gen_sexpr sexpr = match sexpr with
 | SCall(sident, sexpr_list, d) -> match get_sident_name sident with
     print -> "print(" ^ print_sexpr_list sexpr_list ^ ")"
     
-    | sleep -> "time.sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
+    | sleep -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | itos -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
     
@@ -284,7 +284,11 @@ let gen_main = function
 *)
 
 
-let gen_node_list snode_body = 
+let gen_node_list snode_body = match snode_body with
+  [] -> ""
+ |SNode(sident,snode_block)::rst -> gen_tabs 1 ^ "def " ^ get_sid sident ^ "(self):\n" ^
+    ^ gen_sstmt snode_block 2 ^ gen_node_list rst
+    
 let gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
      [] -> ""
 | h::[] -> "self." ^ gen_sstmt h tabs ^ "\n"
