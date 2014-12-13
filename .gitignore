@@ -4,3 +4,5 @@ scanner.ml
 *.cmi
 *.cmo
 statemap
+compiler
+a.out

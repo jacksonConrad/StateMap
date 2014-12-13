@@ -1,8 +1,8 @@
-DFA main (stack<string> main)							
+void DFA main(stack<string> main)	
 {
-	start											
+	start	
 	{
-		print ("Hello World");
-		return;
+	print("Hello World!");
+	return 3;
 	}
 }

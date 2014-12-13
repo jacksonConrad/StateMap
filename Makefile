@@ -16,40 +16,48 @@ parser.ml parser.mli : parser.mly
 	ocamlc -w A -c $<
 
 
-default: all
 
 .PHONY : compile
 compile:
-	ocamlc -c ast.ml
+	ocamlc -g ast.ml
 	ocamlyacc parser.mly
 	ocamlc -c parser.mli
 	ocamlc -c parser.ml
 	ocamllex scanner.mll
 	ocamlc -c scanner.ml
-	ocamlc -c sast.mli
-	ocamlc -c semantic_check.ml
-	ocamlc -c 
+	ocamlc -g sast.mli
+	ocamlc -g semantic_check.ml
+	ocamlc -g gen_python.ml
+	ocamlc -c compiler.ml
+	ocamlc -o compiler -g scanner.cmo parser.cmo semantic_check.cmo gen_python.cmo compiler.cmo
 sc:
 	ocamlc -c sast.mli
 	ocamlc -c semantic_check.ml
 
+default: all
 #Tack on your own targets
 .PHONY : all
 all: clean compile 
 
 .PHONY : clean
 clean:
-	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap
+	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler
 
-ast.cmo:
-ast.cmx:
-semantic_check.cmo:
-semantic_check.cmx:
-statemap.cmo: ast.cmo
-statemap.cmx: ast.cmx
-parser.cmo: ast.cmo parser.cmi 
-parser.cmx: ast.cmx parser.cmi 
-scanner.cmo: parser.cmi 
-scanner.cmx: parser.cmx 
-parser.cmi: ast.cmo 
+# Generaetd by:  ocamldep *.ml *.mli
+ast.cmo :
+ast.cmx :
+compiler.cmo : semantic_check.cmo scanner.cmo parser.cmi gen_python.cmo
+compiler.cmx : semantic_check.cmx scanner.cmx parser.cmx gen_python.cmx
+gen_python.cmo : sast.cmi ast.cmo
+gen_python.cmx : sast.cmi ast.cmx
+parser.cmo : ast.cmo parser.cmi
+parser.cmx : ast.cmx parser.cmi
+scanner.cmo : parser.cmi
+scanner.cmx : parser.cmx
+semantic_check.cmo : sast.cmi ast.cmo
+semantic_check.cmx : sast.cmi ast.cmx
+statemap.cmo : scanner.cmo parser.cmi ast.cmo
+statemap.cmx : scanner.cmx parser.cmx ast.cmx
+parser.cmi : ast.cmo
+sast.cmi : ast.cmo
 

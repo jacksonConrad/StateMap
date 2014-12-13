@@ -1,9 +1,7 @@
-type var_type = Int | String | Stack | Float | Void
-
-type eostype = Eos
+type var_type = Int | String | Stack | Float | Void | Eos
 
 type binop = Add | Sub | Mult | Div | Mod | Equal | Neq | And | Or| Lt | Leq | Gt | Geq
-type unop = Inc | Dec | Not | Neg
+type unop = Not | Neg
 
 type ident =
     Ident of string
@@ -11,7 +9,7 @@ type ident =
 type datatype = 
     Datatype of var_type | (* Possible type for concurrent DFA return stack*)
     Stacktype of datatype|
-    Eostype of eostype
+    Eostype of var_type
 
 type expr = 
     IntLit of int | 
@@ -115,8 +113,6 @@ let rec string_of_expr = function
   | Unop(o, e) -> 
       string_of_expr e ^ " " ^ 
       (match o with
-        Inc -> "++" |
-        Dec -> "--" |
         Not -> "!"  |
         Neg -> "-")
   | Binop(e1, o, e2) ->
@@ -138,10 +134,10 @@ let rec string_of_datatype = function
   Datatype(vartype) -> 
     (match vartype with 
       Int -> "int" | String -> "String" | Stack -> "Stack" | Float -> "Float"
-      | Void -> "Void"
+      | Void -> "Void" | Eos -> "Eos"
     )
   | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
-  | Eostype(Eos) -> "EOS"
+  | Eostype(_) -> "EOS"
 
 
 

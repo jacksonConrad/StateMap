@@ -4,5 +4,4 @@ void DFA main()
     {
         return 3;
     }
-    
 }

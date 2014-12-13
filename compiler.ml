@@ -1,7 +1,10 @@
 open Semantic_check
+open Gen_python
 
 let _ =
-  let lexbuf = Lexing.from_channel stdin in
+  (* let lexbuf = Lexing.from_channel stdin in *)
+  let lexbuf = Lexing.from_string "void DFA main(stack<string> main){start{print(\"Hello World!\");
+	return 3;}}" in
   let ast = Parser.program Scanner.token lexbuf in
   let sast = Semantic_check.check_program ast in
   let code = gen_program sast in

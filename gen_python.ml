@@ -45,8 +45,8 @@ let rec gen_tabs n = match n with
   | _ -> "\t"^gen_tabs (n-1)
 
 let get_sident_name = function
-  SIdent(id, scope) -> if scope == DFAScope then "self." ^ id 
-                        else id
+  SIdent(id, scope) -> if scope == DFAScope then "self." ^ gen_id id 
+                        else gen_id id
 
 
 let gen_unop = function
@@ -60,9 +60,9 @@ let gen_binop = function
 | Div -> "/"
 | Equal -> "=="
 | Neq -> "!="
-| Less -> "<"
+| Lt -> "<"
 | Leq -> "<="
-| Greater -> ">"
+| Gt -> ">"
 | Geq -> ">="
 | Mod -> "%"
 | And -> "and"
@@ -83,15 +83,7 @@ let rec gen_plain_datatype = function
 let gen_formal formal = match formal with
   Formal(datatype, id) -> gen_id id
 
-let gen_concurrency_list sexpr_list = match sexpr_list with
- [] -> ""
-| h::[] -> gen_concurrent_dfa h 
-| h::t -> gen_concurrent_dfa h ^ ", " ^ gen_concurrency_list t
 
-let gen_concurrent_dfa sexpr = match sexpr with
- [] -> ""
-|SCall(sident,sexpr_list,d) -> get_sid sident ^ ", [" ^
-    gen_sexpr_list sexpr_list ^ "]"
 
 
 let rec gen_sexpr sexpr = match sexpr with
@@ -99,56 +91,52 @@ let rec gen_sexpr sexpr = match sexpr with
 | SFloatLit(f, d) -> string_of_float f
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
 | SVariable(sident, d) -> get_sident_name sident
-| SUnop(unop, sexpr, d) -> unop ^ "(" ^ gen_sexpr sexpr ^ ")"
+| SUnop(unop, sexpr, d) -> gen_unop unop ^ "(" ^ gen_sexpr sexpr ^ ")"
 | SBinop(sexpr1, binop, sexpr2, d) -> gen_sexpr sexpr1 ^ gen_binop binop ^
     gen_sexpr sexpr2 
-| SExprAssign(sident, sexpr, d) -> get_sident_name sident ^ " = " ^ gen_sexpr sexpr 
+| SPeek(_,_) -> "TODO: peek"
+| SPop(_,_) -> "TODO: pop"
+| SPush(_,_,_) -> "TODO: push"
+| SEosLit -> "TODO: EOSlit"
 | SCall(sident, sexpr_list, d) -> match get_sident_name sident with
-    print -> "print(" ^ print_sexpr_list sexpr_list ^ ")"
+    "print" -> "print(" ^ gen_sexpr_list sexpr_list ^ ")"
     
-    | sleep -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
+    | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
     
-    | itos -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
+    | "itos" -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
     
-    | concurrent -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
+    | "concurrent" -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
     
-    | _ -> let dfaname = gen_sident_name sident in
-    "callDfa(" ^ get_sid sident ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
+    | _ -> let dfaname = get_sident_name sident in
+    "callDfa(" ^ dfaname ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
 
 and gen_sstmt sstmt tabs = match sstmt with
   SBlock(sstmt_list) ->  gen_sstmt_list sstmt_list tabs
 | SSExpr(sexpr) -> gen_tabs tabs ^ gen_sexpr sexpr ^ "\n"
 | SReturn(sexpr) -> gen_tabs tabs ^ "self.returnVal =  " ^ gen_sexpr sexpr ^ "\n"
 | SDeclaration(sdecl) -> ""
-| SAssign(sident, sexpr) -> gen_tabs tabs ^ gen_sid sident ^ " = " ^
+| SAssign(sident, sexpr) -> gen_tabs tabs ^ get_sident_name sident ^ " = " ^
    gen_sexpr sexpr ^ "\n"
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
-    gen_tabs (tabs+1) ^ "self.nexT = self." ^ gen_sid sident ^ "\n"
+    gen_tabs (tabs+1) ^ "self.nexT = self." ^ get_sident_name sident ^ "\n"
 
-(*gen_sdecl only appears within time blocks, VarDecls are ignored*)
-and gen_sdecl sdecl lcl_prefix = match sdecl with
-  SVarDecl(datatype, sid) -> ""
-| SVarAssignDecl(datatype, sident, svalue) -> gen_svalue datatype svalue sident lcl_prefix
-
-(*gen_svalue only appears within time blocks declartions, assume all local*)
-and gen_svalue datatype svalue sident lcl_prefix = match svalue with
-  SExprVal(sexpr) -> lcl_prefix ^ gen_plain_sid sident ^
-    " = " ^ gen_sexpr sexpr lcl_prefix ^ ";\n"
-| SArrVal(sexpr_list) -> gen_sid sident lcl_prefix ^ ".clear();\n" ^
-     (gen_array_sexpr_list sexpr_list sident lcl_prefix) ^ ";\n"
 
 (*semicolon and newline handled in gen_decl since array decl assignment is actually vector push_back*)
-and gen_decl decl prefix = match decl with
-  VarDecl(datatype, id) -> gen_datatype datatype ^ " " ^ prefix ^ gen_id id  ^ ";\n"
-| VarAssignDecl(datatype, ident, value) -> gen_value datatype value ident prefix
+and gen_sdecl decl = match decl with
+  SVarDecl(datatype, sident) -> "# Variable declared without assignment: " ^ get_sident_name sident ^ "\n"
+| SVarAssignDecl(datatype, sident, value) -> get_sident_name sident ^ " = " ^ gen_svalue value ^ "\n"
 
-and gen_value datatype value ident prefix = match value with
+
+and gen_svalue value = match value with
+  SExprVal(sexpr) -> gen_sexpr sexpr
+
+(* and gen_value datatype value ident prefix = match value with
   ExprVal(expr) -> gen_datatype datatype ^ " " ^ prefix ^ gen_id ident ^ " = " ^ gen_expr expr prefix ^ ";\n"
 | ArrVal(expr_list) -> "const " ^ gen_plain_datatype datatype ^ " " ^
     prefix_array ^ gen_id ident ^ "[] = {"^ gen_expr_list expr_list prefix ^ "};\n" ^
     gen_datatype datatype ^ prefix ^ gen_id ident ^"( " ^ prefix_array ^ gen_id ident ^ ", " ^
     prefix_array ^ gen_id ident ^ "+sizeof(" ^ prefix_array ^ gen_id ident ^
-    ")/sizeof(" ^ prefix_array ^ gen_id ident ^ "[0]) );\n"
+    ")/sizeof(" ^ prefix_array ^ gen_id ident ^ "[0]) );\n" *)
 
 (* and gen_array_sexpr_list sexpr_list sident lcl_prefix = match sexpr_list with
  [] -> ""
@@ -162,12 +150,8 @@ and gen_array_expr_list expr_list ident prefix = match expr_list with
 | h::t -> prefix ^ gen_id ident ^ ".push_back(" ^ gen_expr h prefix
   ^ ");\n" ^ (gen_array_expr_list t ident prefix) *)
 
-and gen_func func prefix =
-  gen_datatype func.return ^ " " ^ prefix ^ gen_id func.fname ^
-  "(" ^ gen_formal_list func.formals prefix ^ 
-  ") {\n" ^ gen_stmt_list func.body prefix ^ "}\n"
 
-and gen_decl_list decl_list prefix = match decl_list with
+(* and gen_decl_list decl_list prefix = match decl_list with
  [] -> ""
 | h::[] -> gen_decl h prefix
 | h::t -> gen_decl h prefix ^ gen_decl_list t prefix
@@ -175,7 +159,7 @@ and gen_decl_list decl_list prefix = match decl_list with
 and gen_func_list func_list prefix = match func_list with
  [] -> ""
 | h::[] -> gen_func h prefix
-| h::t -> gen_func h prefix ^ gen_func_list t prefix
+| h::t -> gen_func h prefix ^ gen_func_list t prefix *)
 
 and gen_formal_list formal_list = match formal_list with
  [] -> ""
@@ -191,6 +175,18 @@ and gen_sexpr_list sexpr_list = match sexpr_list with
  [] -> ""
 | h::[] -> gen_sexpr h 
 | h::t -> gen_sexpr h ^ ", " ^ gen_sexpr_list t
+
+
+and gen_concurrent_dfa sexpr = match sexpr with
+ (* [] -> "" *)
+SCall(sident,sexpr_list,d) -> get_sident_name sident ^ ", [" ^
+    gen_sexpr_list sexpr_list ^ "]"
+| _ -> "TODO: semantically check args of calls to concurrent()"
+
+and gen_concurrency_list sexpr_list = match sexpr_list with
+ [] -> ""
+| h::[] -> gen_concurrent_dfa h 
+| h::t -> gen_concurrent_dfa h ^ ", " ^ gen_concurrency_list t
 
 
 
@@ -284,12 +280,12 @@ let gen_main = function
 *)
 
 
-let gen_node_list snode_body = match snode_body with
+let rec gen_node_list snode_body = match snode_body with
   [] -> ""
- |SNode(sident,snode_block)::rst -> gen_tabs 1 ^ "def " ^ get_sid sident ^ "(self):\n" ^
-    ^ gen_sstmt snode_block 2 ^ gen_node_list rst
+  | SNode(sident,snode_block)::rst -> gen_tabs 1 ^ "def " ^ gen_id (gen_sid sident) ^ "(self):\n" ^
+    gen_sstmt snode_block 2 ^ gen_node_list rst
     
-let gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
+let rec gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
      [] -> ""
 | h::[] -> "self." ^ gen_sstmt h tabs ^ "\n"
 | h::t -> "self." ^ gen_sstmt h tabs ^ "\n" ^ gen_dfascope_VarDecls t tabs
@@ -297,29 +293,30 @@ let gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
 let rec get_type_from_datatype = function
     Datatype(t) -> t
     | Stacktype(ty) -> get_type_from_datatype ty
-    | Eostype(Eos) -> "Eos"
+    | Eostype(e) -> e
 
-let gen_unpacked_formal_list sformals index tabs = match sformals with
+let rec gen_unpacked_formal_list sformals index tabs = match sformals with
     [] -> ""
-    |Formal(dt,id)::rst -> gen_tabs tabs ^ gen_sid id ^ "= args[" ^
+    |Formal(dt,id)::rst -> gen_tabs tabs ^ gen_id id ^ "= args[" ^
     string_of_int index ^ "]\n" ^ gen_unpacked_formal_list rst (index+1) tabs
 
 
+let get_main_dfa_str name = match name with
+  "mainDFA" -> gen_tabs 2 ^ "while self.returnVal is None:\n" ^ gen_tabs 3 ^ "mainDFA.now()\n" ^ gen_tabs 3 ^ "mainDFA.now = self.nexT\n"
+  | _ -> ""
+
 let gen_sdfa_str sdfa_str =
-  "class " gen_sid sdfa_str.sdfaname ^ ":\n" ^
-  (*gen_tabs 1 ^ "def __init__(self," ^ gen_formal_list sdfa_str.sformals ^ "):\n" ^*)
-  gen_tabs 1 ^ "def __init__(self,*args):\n" ^
-  gen_unpacked_formal_list sdfa_str.sformals 0 2 ^
-  gen_tabs 2 ^ "self.returnVal = None\n" ^
-  gen_tabs 2 ^ (gen_sid sdfa_str.sdfaname) ^".now = start\n" ^
-  gen_tabs 2 ^ "self.nexT = None\n" ^
-  gen_dfascope_VarDecls sdfa_str.svar_body 2 ^
-  if (gen_sid sdfa_str.dfaname) == "mainDFA" then 
-      gen_tabs 2 ^ "while self.returnVal is None:\n" ^
-      gen_tabs 3 ^ "mainDFA.now()\n" ^
-      gen_tabs 3 ^ "mainDFA.now = self.nexT\n"
-  gen_tabs 2 ^ "return" ^
-  gen_node_list sdfa_str.snode_body (*TODO need to do gen_node_list*)
+  "class " ^ gen_id sdfa_str.sdfaname ^ ":\n" ^
+    (*gen_tabs 1 ^ "def __init__(self," ^ gen_formal_list sdfa_str.sformals ^ "):\n" ^*)
+    gen_tabs 1 ^ "def __init__(self,*args):\n" ^
+    gen_unpacked_formal_list sdfa_str.sformals 0 2 ^
+    gen_tabs 2 ^ "self.returnVal = None\n" ^
+    gen_tabs 2 ^ (gen_id sdfa_str.sdfaname) ^".now = start\n" ^
+    gen_tabs 2 ^ "self.nexT = None\n" ^
+    gen_dfascope_VarDecls sdfa_str.svar_body 2 ^
+    get_main_dfa_str (gen_id sdfa_str.sdfaname) ^ gen_tabs 2 ^ "return" ^ 
+    gen_node_list sdfa_str.snode_body 
+    (*TODO need to do gen_node_list*)
 
 let gen_sdfa_decl = function
   SDfa_Decl(sdfa_str, dt) -> gen_sdfa_str sdfa_str

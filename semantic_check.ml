@@ -11,7 +11,7 @@ type symbol_table = {
 
 type dfa_table = {
     dfas: (datatype * ident * formal list * sstmt list * snode list) list
-} (*Jacked sstmt from Slang. Did NOT use stmt. sstmt is defined in sast*)
+} 
 
 type node_table = {
     parent1: string;
@@ -28,8 +28,12 @@ type translation_environment = {
 }
 
 (* search for a function in our function table*)
+let get_ident_name ident = match ident with
+    Ident(n) -> n
+
 let find_dfa (dfa_lookup: dfa_table) name =
-    List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas
+    try (List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas) with
+    Not_found -> raise(Error("DFA " ^ get_ident_name name ^ " not found"))
 
 let basic_math t1 t2 = match (t1, t2) with
     (Float, Int) -> (Float, true)
@@ -57,7 +61,7 @@ let equal_logic t1 t2 = match(t1,t2) with
 let rec get_type_from_datatype = function
     Datatype(t)->t
     | Stacktype(ty) -> get_type_from_datatype ty
-    | Eostype(Eos) -> Void
+    | Eostype(t) -> Void
 
 let get_binop_return_value op typ1 typ2 = 
   let t1 = get_type_from_datatype typ1 and t2 = get_type_from_datatype typ2 in
@@ -96,7 +100,7 @@ let update_variable env (name, datatype, value) =
         in  
         (fun node_scope -> ((List.find (fun (s,_,_) -> s=name)
         node_scope),2)) globalScope.variables
-            with Not_found -> raise Not_found in
+            with Not_found -> raise(Error("Not Found exception in update_variable"))in
     let new_envf =
     match location with 
         1 -> 
@@ -127,12 +131,12 @@ let find_variable env name =
   in
     try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
     with Not_found -> try List.find(fun (s,_,_) -> s=name) globalScope.variables
-    with Not_found -> raise Not_found
+    with Not_found -> raise(Error("Variable not found in find_variable"))
 
 (*search for variable in local symbol tables*)
 let find_local_variable env name =
     try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> raise Not_found
+    with Not_found -> raise(Error("Variable not found in find_local_variable"))
 
 let peek env stack = 
     let (_,id,_)  = try find_variable env stack with
@@ -322,7 +326,7 @@ let find_global_variable env name =
   Some scope -> scope 
     | None -> raise (Error("No global scope5")) in
     try List.find (fun (s,_,_) -> s=name) globalScope.variables
-    with Not_found -> raise Not_found
+    with Not_found -> raise (Error("error in find_global_variable"))
 
 let initialize_globals (globals, env) decl = 
     let (name, ty) = get_name_type_from_decl decl in
@@ -511,10 +515,9 @@ let check_main env str =
 
 (*Semantic checking on a program*)
 let check_program program =
-    let (dfas,(globals)) = program in
+    (* raise(Error("beeepboop")) *)
+    let dfas = program in
     let env = empty_environment in
     let (typed_dfas, new_env) = initialize_dfas env dfas in
     let (_) = check_main new_env "main" in
-    let (typed_globals, new_env2) = List.fold_left(fun (new_globals,env)
-             globals -> initialize_globals (new_globals, env) globals) ([], new_env) globals in
     Prog(typed_dfas)
