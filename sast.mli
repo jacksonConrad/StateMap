@@ -19,7 +19,7 @@ and sexpr =
     | SUnop of unop * sexpr * datatype
     | SBinop of sexpr * binop * sexpr * datatype
     (* changed int to sexpr in SArrElem *)
-    | SExprAssign of sident * sexpr * datatype
+    (* | SExprAssign of sident * sexpr * datatype *)
     | SCall of sident * sexpr list * datatype
     | SPeek of sident * datatype
     | SPop of sident * datatype
