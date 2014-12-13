@@ -32,8 +32,7 @@ let get_ident_name ident = match ident with
     Ident(n) -> n
 
 let find_dfa (dfa_lookup: dfa_table) name =
-    try (List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas) with
-    Not_found -> raise(Error("DFA " ^ get_ident_name name ^ " not found"))
+    List.find (fun (_,s,_,_,_) -> s=name) dfa_lookup.dfas
 
 let basic_math t1 t2 = match (t1, t2) with
     (Float, Int) -> (Float, true)
@@ -407,7 +406,7 @@ let rec check_stmt env stmt = match stmt with
        let t=get_type_from_datatype(check_expr env ex) in
        if not(t=Int) then
            raise(Error("Improper Transition Expression Datatype")) else
-       (STransition(SIdent(idState, get_node_scope env idState), get_sexpr env ex), env)
+       (STransition(SIdent(idState, StateScope), get_sexpr env ex), env)
 
 let get_sstmt_list env stmt_list = 
      List.fold_left (fun (sstmt_list,env) stmt -> 
@@ -423,16 +422,20 @@ let get_svar_list env var_list =
         let (svar, new_env) = check_stmt env stmt in 
         (svar::svar_list, new_env)) ([],env) var_list
 
+open Printf
+
 let get_snode_body env node_list =
   List.fold_left (fun (snode_list, env) raw_node ->
   match raw_node with
         Node((Ident(name), node_stmt_list)) ->
-          let exprStar = Expr(StringLit("*")) in
-          if List.mem exprStar node_stmt_list then
-            let node_block = Block(node_stmt_list) in
-            let (snode_block, new_env) = check_stmt env node_block in
-            (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list,
-            new_env)
+            let transCatchAllList = List.filter( function
+                Transition(_,IntLit(1)) -> true
+                | _ -> false) node_stmt_list in
+            if transCatchAllList != [] then
+                let node_block = Block(node_stmt_list) in
+                let (snode_block, new_env) = check_stmt env node_block in
+                (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list,
+                new_env)
           else raise(Error("No catch all"))
   ) ([],env) node_list
 
@@ -477,14 +480,13 @@ let transition_check node_list =
         id::states_list
       | _ -> []) ([]) flat
   in List.map (fun id -> try (List.mem id allNodes) with Not_found ->
-    raise(Error("Invalid state transition")) ) states
+    raise(Error("Invalid state transition"))) states
 
 (* Semantic checking on a function*)
 let check_dfa env dfa_declaration =
-  let(_,name,_,_,_) = find_dfa env.dfa_lookup dfa_declaration.dfa_name in
-    if name = dfa_declaration.dfa_name then
-    raise(Error("DFA already declared"))
-    else
+    try(let (_,_,_,_,_) =  find_dfa env.dfa_lookup dfa_declaration.dfa_name in 
+  raise(Error("DFA already declared"))) with 
+  Not_found ->
       let new_locals = List.fold_left(fun a vs -> (get_name_type_from_formal env vs)::a)[] dfa_declaration.formals in
       let new_node_scope = {parent=env.node_scope.parent(*Why SLANG do this:
           Some(env.node_scope)*); variables = new_locals;} in

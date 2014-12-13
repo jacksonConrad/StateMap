@@ -74,7 +74,7 @@ stmt_list:
 stmt:
 	RETURN expr SEMI  {Return($2)}
 	| ID TRANS expr SEMI {Transition(Ident($1),$3)} 
-	| ID TRANS STAR SEMI {Transition(Ident($1),IntLit(1))} /*Note expr = 1 here since eval( * )==TRUE*/
+	| ID TRANS STAR SEMI {Transition(Ident($1),IntLit(1))} /*Star evaluates to IntLit 1 because that's True in StateMap*/
 	| vdecl {Declaration($1)}
   | ID ASSIGN expr SEMI { Assign(Ident($1), $3) } /*Assignment post-declaration*/
 	| expr SEMI {Expr($1)}

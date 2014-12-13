@@ -4,6 +4,7 @@ open Ast
 type scope = 
     NodeScope
     | DFAScope
+    | StateScope
 
 type sident =
     SIdent of ident * scope
