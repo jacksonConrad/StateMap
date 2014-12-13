@@ -6,6 +6,7 @@ void DFA main(stack<string> main)
 	start											
 	{	
 		concurrent(clock(halfPeriod), TFF1(), TFF2(), display());
+		return;
 	}	
 }
 
