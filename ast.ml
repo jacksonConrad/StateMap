@@ -1,4 +1,4 @@
-type var_type = Int | String | Stack | Double | Void
+type var_type = Int | String | Stack | Float | Void
 
 type eostype = Eos
 
@@ -16,12 +16,12 @@ type datatype =
 type expr = 
     IntLit of int | 
     StringLit of string |
-    DoubleLit of float  |
+    FloatLit of float  |
     EosLit |
     Variable of ident |
     Unop of unop * expr |
     Binop of expr * binop * expr |
-    ExprAssign of ident * expr |
+    (* ExprAssign of ident * expr | *)
     Call of ident * expr list |
     Push of ident * expr |
     Pop of ident |
@@ -41,7 +41,7 @@ type stmt =
     Assign of ident * expr |
     (*TransWrapper of expr | Why do we have this????*)
     Transition of ident * expr |
-    Return of expr
+    Return of expr 
 
 type formal = 
     Formal of datatype * ident
@@ -110,7 +110,7 @@ let string_of_ident = function
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
   | StringLit(l) -> l
-  | DoubleLit(l) -> string_of_float l
+  | FloatLit(l) -> string_of_float l
   | Variable(id) -> string_of_ident id 
   | Unop(o, e) -> 
       string_of_expr e ^ " " ^ 
@@ -126,7 +126,7 @@ let rec string_of_expr = function
       | Equal -> "==" | Neq -> "!=" | Mod -> "%"
       | Lt -> "<" | Leq -> "<=" | Gt -> ">" | Geq -> ">=" | And -> "&&" | Or -> "||" ) ^ " " ^
       string_of_expr e2
-  | ExprAssign(id, e) -> string_of_ident id ^ " " ^ string_of_expr e
+  (* | ExprAssign(id, e) -> string_of_ident id ^ " " ^ string_of_expr e *)
   | Call(id, e_list) -> string_of_ident id ^ " " ^ 
       "(" ^ String.concat ", " (List.map string_of_expr e_list) ^ ")"
   | Push(id, e) -> string_of_ident id ^ " " ^ string_of_expr e 
@@ -137,7 +137,7 @@ let rec string_of_expr = function
 let rec string_of_datatype = function
   Datatype(vartype) -> 
     (match vartype with 
-      Int -> "int" | String -> "String" | Stack -> "Stack" | Double -> "Double"
+      Int -> "int" | String -> "String" | Stack -> "Stack" | Float -> "Float"
       | Void -> "Void"
     )
   | Stacktype(datatype) -> "Stack<" ^ string_of_datatype datatype ^ ">"
@@ -156,7 +156,8 @@ let rec string_of_stmt = function
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
-  | Assign(id, expr) -> string_of_ident id ^ " = " ^ string_of_expr expr
+  | Assign(id, expr) -> string_of_ident id ^ " = " ^ string_of_expr expr ^
+  ";\n";
   (* | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s *)
   (* | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^ *)
       (* string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2 *)
@@ -166,6 +167,7 @@ let rec string_of_stmt = function
   (* | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s *)
   | Declaration(decl) -> string_of_decl decl
   | Transition(id, expr) -> string_of_ident id ^ " <- (" ^ string_of_expr expr ^ ")"
+
 
 
 

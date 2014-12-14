@@ -13,13 +13,13 @@ type sval =
 
 and sexpr = 
     SIntLit of int * datatype 
-    | SDoubleLit of float * datatype
+    | SFloatLit of float * datatype
     | SStringLit of string * datatype
     | SVariable of sident * datatype
     | SUnop of unop * sexpr * datatype
     | SBinop of sexpr * binop * sexpr * datatype
     (* changed int to sexpr in SArrElem *)
-    | SExprAssign of sident * sexpr * datatype
+    (* | SExprAssign of sident * sexpr * datatype *)
     | SCall of sident * sexpr list * datatype
     | SPeek of sident * datatype
     | SPop of sident * datatype

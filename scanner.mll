@@ -19,8 +19,6 @@ rule token =
 | '%'      { MOD }
 | '='      { ASSIGN }
 | "=="     { EQ }
-| "++"	   { INC }
-| "--"	   { DEC }
 | '!'      { NOT }
 | "!="     { NEQ }
 | "&&"     { AND }
@@ -32,7 +30,7 @@ rule token =
 | ">="     { GEQ }
 | "return" { RETURN }
 | "int"    { INT }
-| "double" { DOUBLE }
+| "float"  { FLOAT }
 | "string" { STRING }
 | "void"   { VOID }
 | "DFA"    { DFA }
