@@ -11,11 +11,11 @@ let _ =
             state3<- (counter > 10);
             state2<-*;}
         state2{
-            print(\"state2\n\");
+            print(\"state2\\n\");
             counter=(counter + 1);
             start<-*;}
         state3{
-            print(\"state3\n\");
+            print(\"state3\\n\");
             return 10;}
 }" in
   let ast = Parser.program Scanner.token lexbuf in

@@ -231,13 +231,17 @@ let get_datatype_from_val env = function
 let get_sdecl env decl =
   let scope = match env.location with
   "in_dfa" -> DFAScope
-   | "node" -> NodeScope 
-   | _ -> StateScope in
+   | "node" -> (match decl with 
+      VarDecl(_, ident) -> (try(ignore(find_local_variable env ident); DFAScope)  with 
+        Not_found -> NodeScope)
+      | VarAssignDecl(_, ident, _) -> (try(ignore(find_local_variable env ident); DFAScope) with
+        Not_found -> NodeScope))
+   | _ -> DFAScope in
     match decl with
-        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, scope)), env)
+        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, DFAScope)), env)
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
-        (SVarAssignDecl(datatype, SIdent(ident, scope), sv), env)
+        (SVarAssignDecl(datatype, SIdent(ident, DFAScope), sv), env)
 (*    if Not_found then match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
         | VarAssignDecl(datatype, ident, value) -> 
@@ -317,7 +321,7 @@ let empty_dfa_table_initialization = {
         check formals*)
     ]}
 let empty_environment = {return_type = Datatype(Void); return_seen = false;
-    location="main"; node_scope = {empty_table_initialization with parent =
+    location="in_dfa"; node_scope = {empty_table_initialization with parent =
       Some(empty_table_initialization)}; (*node_lookup = [];*) dfa_lookup = empty_dfa_table_initialization}
 
 let find_global_variable env name =
@@ -508,8 +512,8 @@ let check_dfa env dfa_declaration =
       let _ = transition_check dfa_declaration.node_body in
       let (global_var_decls, penultimate_env) = get_svar_list new_env
       dfa_declaration.var_body in
-      let location_change_env = {penultimate_env with location = "node"} in
-      let (checked_node_body, final_env) = get_snode_body location_change_env
+      (*let location_change_env = {penultimate_env with location = "node"} in*)
+      let (checked_node_body, final_env) = get_snode_body penultimate_env
       dfa_declaration.node_body in
       let _ =check_final_env final_env in
       let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =

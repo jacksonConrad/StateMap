@@ -64,7 +64,7 @@ let get_sident_name = function
     SIdent(id,scope) -> match scope with
         NodeScope -> "boop." ^ gen_id id
         |DFAScope -> "self." ^ gen_id id
-        |StateScope -> "self." ^ gen_id id
+        |StateScope -> "bleep" ^ gen_id id
 
 let gen_unop = function
   Neg -> "-"
@@ -112,7 +112,7 @@ let rec gen_sexpr sexpr = match sexpr with
 | SPop(_,_) -> "TODO: pop"
 | SPush(_,_,_) -> "TODO: push"
 | SEosLit -> "TODO: EOSlit"
-| SCall(sident, sexpr_list, d) -> match get_sident_name sident with
+| SCall(sident, sexpr_list, d) -> match gen_id (gen_sid sident) with
     "print" -> "print(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
@@ -138,7 +138,7 @@ and gen_sstmt sstmt tabs = match sstmt with
 | SAssign(sident, sexpr) -> gen_tabs tabs ^ get_sident_name sident ^ " = " ^
    gen_sexpr sexpr ^ "\n"
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
-    gen_tabs (tabs+1) ^ "self.nexT = " ^ get_sident_name sident ^ "\n" ^
+    gen_tabs (tabs+1) ^ "self.nexT = self." ^ get_sident_name sident ^ "\n" ^
     gen_tabs (tabs+1) ^ "return\n"
 
 
@@ -308,8 +308,8 @@ let rec gen_node_list snode_body = match snode_body with
     
 let rec gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
      [] -> ""
-| h::[] -> gen_tabs tabs ^ "self." ^ gen_sstmt h 0 ^ "\n"
-| h::t -> gen_tabs tabs ^"self." ^ gen_sstmt h 0 ^ "\n" ^ gen_dfascope_VarDecls t tabs
+| h::[] -> gen_tabs tabs ^ gen_sstmt h 0 ^ "\n"
+| h::t -> gen_tabs tabs ^ gen_sstmt h 0 ^ "\n" ^ gen_dfascope_VarDecls t tabs
 
 let rec get_type_from_datatype = function
     Datatype(t) -> t
