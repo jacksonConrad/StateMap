@@ -129,13 +129,11 @@ let find_variable env name =
     |None -> raise(Error("No Global Scope3"))
   in
     try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> try List.find(fun (s,_,_) -> s=name) globalScope.variables
-    with Not_found -> raise(Error("Variable not found in find_variable"))
+    with Not_found -> List.find(fun (s,_,_) -> s=name) globalScope.variables
 
 (*search for variable in local symbol tables*)
 let find_local_variable env name =
-    try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> raise(Error("Variable not found in find_local_variable"))
+    List.find (fun (s,_,_) -> s=name) env.node_scope.variables
 
 let peek env stack = 
     let (_,id,_)  = try find_variable env stack with
@@ -231,13 +229,11 @@ let get_datatype_from_val env = function
     ExprVal(expr) -> check_expr env expr
 
 let get_sdecl env decl =
-    (*try find_local_variable env v with
-      Not_found ->*) (* CHECK TO SEE IF THIS ACTUALLY WORKS!!!!!!!!!!!!!!!!!!!*)
     match decl with
-        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, NodeScope)), env)
+        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, get_node_scope env ident)), env)
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
-        (SVarAssignDecl(datatype, SIdent(ident, NodeScope), sv), env)
+        (SVarAssignDecl(datatype, SIdent(ident, get_node_scope env ident), sv), env)
 (*    if Not_found then match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
         | VarAssignDecl(datatype, ident, value) -> 
@@ -510,7 +506,7 @@ let check_dfa env dfa_declaration =
       let _ = transition_check dfa_declaration.node_body in
       let (global_var_decls, penultimate_env) = get_svar_list new_env
       dfa_declaration.var_body in
-      let (checked_node_body, final_env) = get_snode_body new_env
+      let (checked_node_body, final_env) = get_snode_body penultimate_env
       dfa_declaration.node_body in
       let _ =check_final_env final_env in
       let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =

@@ -47,20 +47,24 @@ let return = "return"
 let gen_id = function
   Ident(id) -> id
 
-(*WHY DO WE HAVE gen_sid and get_var_sident_name*)
+(*WHY DO WE HAVE gen_sid and get_sident_name*)
 let gen_sid = function
   SIdent(id,dt) -> id
 
 let rec gen_tabs n = match n with
-  1 -> "\t"
+  0 -> ""
+  |1 -> "\t"
   | _ -> "\t"^gen_tabs (n-1)
 
-let get_var_sident_name = function
+(*let get_sident_name = function
   SIdent(id, scope) -> if scope == DFAScope then "self." ^ gen_id id 
-                        else gen_id id
-let get_raw_sident_name = function
-    SIdent(id,scope) -> gen_id id
+                        else gen_id id*)
 
+let get_sident_name = function
+    SIdent(id,scope) -> match scope with
+        NodeScope -> "boop." ^ gen_id id
+        |DFAScope -> "self." ^ gen_id id
+        |StateScope -> "self." ^ gen_id id
 
 let gen_unop = function
   Neg -> "-"
@@ -96,14 +100,11 @@ let rec gen_plain_datatype = function
 let gen_formal formal = match formal with
   Formal(datatype, id) -> gen_id id
 
-
-
-
 let rec gen_sexpr sexpr = match sexpr with
   SIntLit(i, d) -> string_of_int i
 | SFloatLit(f, d) -> string_of_float f
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
-| SVariable(sident, d) -> get_var_sident_name sident
+| SVariable(sident, d) -> get_sident_name sident
 | SUnop(unop, sexpr, d) -> gen_unop unop ^ "(" ^ gen_sexpr sexpr ^ ")"
 | SBinop(sexpr1, binop, sexpr2, d) -> gen_sexpr sexpr1 ^ gen_binop binop ^
     gen_sexpr sexpr2 
@@ -111,7 +112,7 @@ let rec gen_sexpr sexpr = match sexpr with
 | SPop(_,_) -> "TODO: pop"
 | SPush(_,_,_) -> "TODO: push"
 | SEosLit -> "TODO: EOSlit"
-| SCall(sident, sexpr_list, d) -> match get_raw_sident_name sident with
+| SCall(sident, sexpr_list, d) -> match get_sident_name sident with
     "print" -> "print(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
@@ -120,24 +121,31 @@ let rec gen_sexpr sexpr = match sexpr with
     
     | "concurrent" -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
     
-    | _ -> let dfaname = get_var_sident_name sident in
+    | _ -> let dfaname = get_sident_name sident in
     "callDfa(" ^ dfaname ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
 
 and gen_sstmt sstmt tabs = match sstmt with
   SBlock(sstmt_list) ->  gen_sstmt_list sstmt_list tabs
 | SSExpr(sexpr) -> gen_tabs tabs ^ gen_sexpr sexpr ^ "\n"
 | SReturn(sexpr) -> gen_tabs tabs ^ "self.returnVal =  " ^ gen_sexpr sexpr ^ "\n"
-| SDeclaration(sdecl) -> ""
-| SAssign(sident, sexpr) -> gen_tabs tabs ^ get_var_sident_name sident ^ " = " ^
+| SDeclaration(sdecl) -> (match sdecl with
+    SVarDecl(dt,sident) -> (match dt with
+        Stacktype(_) -> gen_tabs tabs ^ get_sident_name sident ^ "= list()\n"
+        |Datatype(_) -> gen_tabs tabs ^ get_sident_name sident ^ "= None\n"
+        |Eostype(_) -> "")
+   |SVarAssignDecl(dt,sident,SExprVal(sval)) -> gen_tabs tabs ^
+                            get_sident_name sident ^ " = " ^ gen_sexpr sval)
+| SAssign(sident, sexpr) -> gen_tabs tabs ^ get_sident_name sident ^ " = " ^
    gen_sexpr sexpr ^ "\n"
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
-    gen_tabs (tabs+1) ^ "self.nexT = self." ^ get_raw_sident_name sident ^ "\n"
+    gen_tabs (tabs+1) ^ "self.nexT = " ^ get_sident_name sident ^ "\n" ^
+    gen_tabs (tabs+1) ^ "return\n"
 
 
 (*semicolon and newline handled in gen_decl since array decl assignment is actually vector push_back*)
 and gen_sdecl decl = match decl with
-  SVarDecl(datatype, sident) -> "# Variable declared without assignment: " ^ get_var_sident_name sident ^ "\n"
-| SVarAssignDecl(datatype, sident, value) -> get_var_sident_name sident ^ " = " ^ gen_svalue value ^ "\n"
+  SVarDecl(datatype, sident) -> "# Variable declared without assignment: " ^ get_sident_name sident ^ "\n"
+| SVarAssignDecl(datatype, sident, value) -> get_sident_name sident ^ " = " ^ gen_svalue value ^ "\n"
 
 
 and gen_svalue value = match value with
@@ -192,7 +200,7 @@ and gen_sexpr_list sexpr_list = match sexpr_list with
 
 and gen_concurrent_dfa sexpr = match sexpr with
  (* [] -> "" *)
-SCall(sident,sexpr_list,d) -> get_raw_sident_name sident ^ ", [" ^
+SCall(sident,sexpr_list,d) -> get_sident_name sident ^ ", [" ^
     gen_sexpr_list sexpr_list ^ "]"
 | _ -> "TODO: semantically check args of calls to concurrent()"
 
@@ -300,8 +308,8 @@ let rec gen_node_list snode_body = match snode_body with
     
 let rec gen_dfascope_VarDecls sstmt_list tabs = match sstmt_list with
      [] -> ""
-| h::[] -> "self." ^ gen_sstmt h tabs ^ "\n"
-| h::t -> "self." ^ gen_sstmt h tabs ^ "\n" ^ gen_dfascope_VarDecls t tabs
+| h::[] -> gen_tabs tabs ^ "self." ^ gen_sstmt h 0 ^ "\n"
+| h::t -> gen_tabs tabs ^"self." ^ gen_sstmt h 0 ^ "\n" ^ gen_dfascope_VarDecls t tabs
 
 let rec get_type_from_datatype = function
     Datatype(t) -> t
