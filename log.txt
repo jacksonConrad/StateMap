@@ -1,0 +1,11 @@
+	TESTING ./tests/hello.sm
+		Compiling ... 
+		Python runtime output:
+		Diff:
+
+		OK!
+	TESTING ./tests/void_return.sm
+		Compiling ... 
+Fatal error: exception Parsing.Parse_error
+		BAD!
+		Compilation of ./tests/void_return.sm FAILED
