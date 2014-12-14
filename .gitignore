@@ -5,4 +5,5 @@ scanner.ml
 *.cmo
 statemap
 compiler
+output.py
 a.out
