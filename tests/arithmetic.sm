@@ -1,0 +1,21 @@
+// Arithmetic
+
+
+int DFA main()	
+{
+	start	
+	{
+	int a = 5+5;
+	// print(a);
+	/*int b = 10/10;
+	print(b);
+	int c = 10 + 5 + 2 - 10;
+	print(c);
+	int d = (20*5)/10 + 5;
+	print(d);
+	int e = 12 % 5;
+	print(e); */
+
+	return 1;
+	}
+}

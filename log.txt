@@ -1,14 +1,43 @@
+	TESTING ./tests/arithmetic.sm
+		Compiling ... 
+		Python runtime output:
+		Diff:
+
+0a1,5
+> 25
+> 1
+> 7
+> 15
+> 2
+\ No newline at end of file
+		OK!
+	TESTING ./tests/basic_stack.sm
+		Compiling ... 
+Fatal error: exception Semantic_check.Error("Mismatch in types for
+        assignment")
+		BAD!
+		Compilation of ./tests/basic_stack.sm FAILED
 	TESTING ./tests/concurrent.sm
 		Compiling ... 
 Fatal error: exception Semantic_check.Error("Undeclared Function: get_int")
 		BAD!
 		Compilation of ./tests/concurrent.sm FAILED
+	TESTING ./tests/dfa_args.sm
+		Compiling ... 
+Fatal error: exception Semantic_check.Error("Undeclared Function: args")
+		BAD!
+		Compilation of ./tests/dfa_args.sm FAILED
 	TESTING ./tests/hello.sm
 		Compiling ... 
 		Python runtime output:
 		Diff:
 
 		OK!
+	TESTING ./tests/return_types.sm
+		Compiling ... 
+Fatal error: exception Parsing.Parse_error
+		BAD!
+		Compilation of ./tests/return_types.sm FAILED
 	TESTING ./tests/subdfa_call.sm
 		Compiling ... 
 Fatal error: exception Semantic_check.Error("Undeclared Function: get_int")
