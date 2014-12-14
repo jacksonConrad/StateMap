@@ -26,3 +26,9 @@ make it so that callDFA code gens empty args correctly
 make it so that dfas in lookup dont' get "self" appended
 
 enforce returnVal, nexT, and now as unoverwriteable keywords
+
+main dfa return void
+
+main dfa stack argument throws error in python
+
+sub-dfa's not callable

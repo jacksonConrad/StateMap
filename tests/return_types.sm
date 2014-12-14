@@ -1,0 +1,41 @@
+// Testing return types
+void DFA main()	
+{
+	start	
+	{
+	int x = get_int();
+	print(x);
+	float y = get_float();
+	print(y);
+	string z = get_string();
+	print(z);
+	char a = get_char();
+	print(a);
+
+	return;
+	}
+}
+
+int DFA get_int() {
+	start {
+		return 10;
+	}
+}
+
+float DFA get_float() {
+	start {
+		return 10.0;
+	}
+}
+
+string DFA get_string() {
+	start {
+		return "Ten";
+	}
+}
+
+char DFA get_char() {
+	start {
+		return 'a';
+	}
+}

@@ -1,0 +1,17 @@
+// dfa arguments
+
+int DFA main()	
+{
+	start	
+	{
+	int x = args(1,2);
+	print(x); // 3
+	return 3;
+	}
+}
+
+int DFA args(int a, int b) {
+	start {
+		return a + b;
+	}
+}

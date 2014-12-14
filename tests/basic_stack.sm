@@ -1,0 +1,28 @@
+// Basic stack operations
+
+int DFA main()	
+{
+	stack<int> s;
+
+	start	
+	{
+		s.push(1);
+		s.push(2);
+		s.push(3);
+		print(s.peek()); // 3
+		print(s.pop());  // 3
+		print(s.pop());  // 2
+		print(s.pop());  // 1
+
+		end <- EOS == s.peek();
+		print("FAIL"); 
+		return 0;
+
+	}
+
+	end {
+		print("SUCCESS");
+		return 1;
+	}
+
+}

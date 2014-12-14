@@ -37,11 +37,13 @@ sc:
 default: all
 #Tack on your own targets
 .PHONY : all
-all: clean compile 
+all: 
+	clean compile 
 
 .PHONY : clean
 clean:
-	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py
+	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py a.out
+
 
 # Generaetd by:  ocamldep *.ml *.mli
 ast.cmo :
