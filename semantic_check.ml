@@ -116,8 +116,9 @@ let update_variable env (name, datatype, value) =
             in
             let new_vars = List.map (fun (n, t, v) -> if(n=name) then (name,
             datatype, value) else (n, t, v)) globalScope.variables in
-            let new_sym_table = {parent = None; variables = new_vars;} in
-            let new_env = {env with node_scope = new_sym_table} in
+            let new_dfa_sym_table = {parent = None; variables = new_vars;} in
+            let new_node_scope = {env.node_scope with parent = Some(new_dfa_sym_table);} in
+            let new_env = {env with node_scope = new_node_scope} in
             new_env
         | _ -> raise(Error("Undefined scope"))
     in new_envf
@@ -232,16 +233,17 @@ let get_sdecl env decl =
   let scope = match env.location with
   "in_dfa" -> DFAScope
    | "node" -> (match decl with 
-      VarDecl(_, ident) -> (try(ignore(find_local_variable env ident); DFAScope)  with 
-        Not_found -> NodeScope)
-      | VarAssignDecl(_, ident, _) -> (try(ignore(find_local_variable env ident); DFAScope) with
-        Not_found -> NodeScope))
+      VarDecl(_, ident) -> (try(ignore(find_local_variable env ident); NodeScope)  with 
+        Not_found -> DFAScope)
+      | VarAssignDecl(_, ident, _) -> (try(ignore(find_local_variable env
+      ident); NodeScope) with
+        Not_found -> DFAScope))
    | _ -> DFAScope in
     match decl with
-        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, DFAScope)), env)
+        VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, scope)), env)
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
-        (SVarAssignDecl(datatype, SIdent(ident, DFAScope), sv), env)
+        (SVarAssignDecl(datatype, SIdent(ident, scope), sv), env)
 (*    if Not_found then match decl with
         VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, Local)), env)
         | VarAssignDecl(datatype, ident, value) -> 
@@ -331,27 +333,6 @@ let find_global_variable env name =
     try List.find (fun (s,_,_) -> s=name) globalScope.variables
     with Not_found -> raise (Error("error in find_global_variable"))
 
-let initialize_globals (globals, env) decl = 
-    let (name, ty) = get_name_type_from_decl decl in
-        let ((_,dt,_),found) = try (fun f -> ((f env name),true)) find_global_variable with 
-            Not_found ->
-                ((name,ty,None),false) in
-        if(found=false) then
-            match decl with
-                VarDecl(datatype,ident) ->
-                    let (name,ty,_) = get_name_type_from_var env decl in
-                    let new_env = add_to_global_table env name ty None in
-                    (SVarDecl(datatype,SIdent(ident,DFAScope))::globals, new_env)
-                | VarAssignDecl(dt, id, value) ->
-                    let t1 = get_type_from_datatype(dt) and t2 = get_type_from_datatype(get_datatype_from_val env value) in
-                    if(t1=t2) then
-                        let (n, t, v) = get_name_type_val_from_decl decl in
-                        let new_env = add_to_global_table env n t v in
-                        (SVarAssignDecl(dt,SIdent(id,DFAScope),get_sval env value)::globals, new_env)
-                    else raise (Error("Type mismatch"))
-                else
-                    raise (Error("Multiple declarations"))
-
 let rec check_stmt env stmt = match stmt with
     | Block(stmt_list) ->
         let new_env=env in
@@ -427,7 +408,9 @@ let get_svar_list env var_list =
         (svar::svar_list, new_env)) ([],env) var_list
 
 let get_snode_body env node_list =
-  List.fold_left (fun (snode_list, env) raw_node ->
+    List.fold_left (fun (snode_list, dfa_env) raw_node ->
+      let node_sym_tab = {parent = Some(dfa_env.node_scope); variables = [];} in 
+      let node_env = {dfa_env with node_scope = node_sym_tab;} in 
   match raw_node with
         Node((Ident(name), node_stmt_list)) ->
             let transCatchAllList = List.filter( function
@@ -445,9 +428,16 @@ let get_snode_body env node_list =
             else
               let block = 
                   let node_block = Block(node_stmt_list) in
-                  let (snode_block, new_env) = check_stmt env node_block in
+                  let (snode_block, new_node_env) = check_stmt node_env node_block in
+                  let new_dfa_node_scope = (match new_node_env.node_scope.parent
+                  with
+                  Some(scope) -> scope
+                | None-> raise(Error("Snode check returns no dfa scope")))
+                  in
+                  let new_dfa_env = {dfa_env with node_scope =
+                    new_dfa_node_scope; return_seen = new_node_env.return_seen} in
                   (SNode(SIdent(Ident(name), NodeScope), snode_block)::snode_list,
-                  new_env) in
+                  new_dfa_env) in
               if retList == [] then
                 if transCatchAllList != [] then
                   block
@@ -504,16 +494,16 @@ let check_dfa env dfa_declaration =
     try(let (_,_,_,_,_) =  find_dfa env.dfa_lookup dfa_declaration.dfa_name in 
   raise(Error("DFA already declared"))) with 
   Not_found ->
-      let new_locals = List.fold_left(fun a vs -> (get_name_type_from_formal env vs)::a)[] dfa_declaration.formals in
-      let new_node_scope = {parent=env.node_scope.parent(*Why SLANG do this:
-          Some(env.node_scope)*); variables = new_locals;} in
-      let new_env = {return_type = dfa_declaration.return; return_seen=false; location="in_dfa"; node_scope = new_node_scope; dfa_lookup = env.dfa_lookup} in
+      let dfaFormals = List.fold_left(fun a vs -> (get_name_type_from_formal env vs)::a)[] dfa_declaration.formals in
+      let dfa_env = {return_type = dfa_declaration.return; return_seen = false;
+      location = "dfa"; node_scope = {parent = None; variables = dfaFormals;};
+      dfa_lookup = env.dfa_lookup} in
       let _ = check_for_start dfa_declaration.node_body in
       let _ = transition_check dfa_declaration.node_body in
-      let (global_var_decls, penultimate_env) = get_svar_list new_env
+      let (global_var_decls, penultimate_env) = get_svar_list dfa_env
       dfa_declaration.var_body in
-      (*let location_change_env = {penultimate_env with location = "node"} in*)
-      let (checked_node_body, final_env) = get_snode_body penultimate_env
+      let location_change_env = {penultimate_env with location = "node"} in
+      let (checked_node_body, final_env) = get_snode_body location_change_env
       dfa_declaration.node_body in
       let _ =check_final_env final_env in
       let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =

@@ -64,7 +64,7 @@ let get_sident_name = function
     SIdent(id,scope) -> match scope with
         NodeScope -> "boop." ^ gen_id id
         |DFAScope -> "self." ^ gen_id id
-        |StateScope -> "bleep" ^ gen_id id
+        |StateScope -> "" ^ gen_id id
 
 let gen_unop = function
   Neg -> "-"
