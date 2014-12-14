@@ -41,7 +41,7 @@ all: clean compile
 
 .PHONY : clean
 clean:
-	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler
+	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py
 
 # Generaetd by:  ocamldep *.ml *.mli
 ast.cmo :

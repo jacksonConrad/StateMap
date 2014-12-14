@@ -131,7 +131,8 @@ and gen_sstmt sstmt tabs = match sstmt with
 | SAssign(sident, sexpr) -> gen_tabs tabs ^ get_var_sident_name sident ^ " = " ^
    gen_sexpr sexpr ^ "\n"
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
-    gen_tabs (tabs+1) ^ "self.nexT = self." ^ get_raw_sident_name sident ^ "\n"
+    gen_tabs (tabs+1) ^ "self.nexT = self." ^ get_raw_sident_name sident ^ "\n" ^
+    gen_tabs (tabs+1) ^ "return\n"
 
 
 (*semicolon and newline handled in gen_decl since array decl assignment is actually vector push_back*)
