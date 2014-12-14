@@ -1,9 +1,19 @@
+	TESTING ./tests/concurrent.sm
+		Compiling ... 
+Fatal error: exception Semantic_check.Error("Undeclared Function: get_int")
+		BAD!
+		Compilation of ./tests/concurrent.sm FAILED
 	TESTING ./tests/hello.sm
 		Compiling ... 
 		Python runtime output:
 		Diff:
 
 		OK!
+	TESTING ./tests/subdfa_call.sm
+		Compiling ... 
+Fatal error: exception Semantic_check.Error("Undeclared Function: get_int")
+		BAD!
+		Compilation of ./tests/subdfa_call.sm FAILED
 	TESTING ./tests/void_return.sm
 		Compiling ... 
 Fatal error: exception Parsing.Parse_error
