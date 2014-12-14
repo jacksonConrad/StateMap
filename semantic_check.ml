@@ -1,6 +1,8 @@
 open Ast
 open Sast
 (*open Option*)
+open Printf
+
 
 exception Error of string
 
@@ -178,8 +180,8 @@ let rec check_expr env e = match e with
         assignment")))); t2  *)(*check_expr env e*)
     | Push(id, e) -> let (_,t1,_) = (find_variable env id) and t2 =
         check_expr env e 
-        in (if not (t1 = t2) then (raise (Error("Mismatch in types for
-        assignment")))); t2 (*check_expr env e*)
+    in (if not (t1 = Stacktype(t2)) then (raise (Error("Mismatch in types for
+        assignment")))); t2 (*check_expr env e*) 
     | Pop(id) -> let (_,t1,_) = (find_variable env id) in t1
     | Peek(id) -> let (_,t1,_) = (find_variable env id) in t1
     | Call(id, e) -> try (let (dfa_ret, dfa_name, dfa_args, dfa_var_body, dfa_node_body)  = find_dfa
@@ -229,6 +231,24 @@ let get_sval env = function
 let get_datatype_from_val env = function
     ExprVal(expr) -> check_expr env expr
 
+ 
+let get_sdecl env decl =
+  let scope = match env.node_scope.parent with
+    Some(_) -> NodeScope
+    |None -> DFAScope
+  in match decl with
+    VarDecl(datatype, ident) -> (SVarDecl(datatype, SIdent(ident, scope)), env)
+    | VarAssignDecl(datatype, ident, value) -> 
+        let sv = get_sval env value in
+        (SVarAssignDecl(datatype, SIdent(ident, scope), sv), env)
+
+(*Oren: Dear Zuokon, I modified get_sdecl because I thought of a better way to
+ * do it.  Let's just check whether the parent of the node_scope of the env is
+ * Some(_) or None, because if it's None then the scope is DFA, but if it's
+ * Some(_) then it must be NodeScope!
+ * The old version is below, just in case.
+ *) 
+(*
 let get_sdecl env decl =
   let scope = match env.location with
   "in_dfa" -> DFAScope
@@ -249,7 +269,7 @@ let get_sdecl env decl =
         | VarAssignDecl(datatype, ident, value) -> 
             let sv = get_sval env value in
         (SVarAssignDecl(datatype, SIdent(ident, Local), sv), env)*)
-
+*)
 let get_name_type_from_decl decl = match decl with
     VarDecl(datatype, ident) -> (ident, datatype)
         | VarAssignDecl(datatype,ident,value) -> (ident,datatype)
@@ -318,6 +338,9 @@ let empty_dfa_table_initialization = {
     (*The built-in int-to-string conversion function*)
         (Datatype(String), Ident("itos"),
         [Formal(Datatype(Int),Ident("int"))],[], []);
+    (*The built-in 'get state' function for concurrently running dfas *)
+        (Datatype(String), Ident("state"),
+        [Formal(Datatype(String),Ident("dfa"))],[],[]);
     (*The built-in concurrent string*)
         (Stacktype(Datatype(String)), Ident("concurrent"), [] ,[], []) (*how to
         check formals*)

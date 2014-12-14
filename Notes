@@ -14,3 +14,15 @@ check for transitions...DONE
 return/transition mutually exclusive ... DONE
 
 return or catch all ... DONE
+
+add state() dfa/function for concurrency purposes ... DONE
+
+add push/pop/peek to code gen ... DONE
+
+make it so that all dfas are logged in the dfa_lookup table before evaluation
+
+make it so that callDFA code gens empty args correctly
+
+make it so that dfas in lookup dont' get "self" appended
+
+enforce returnVal, nexT, and now as unoverwriteable keywords

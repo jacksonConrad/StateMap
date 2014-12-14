@@ -4,16 +4,7 @@ open Gen_python
 let _ =
   (* let lexbuf = Lexing.from_channel stdin in *)
     let lexbuf = Lexing.from_string 
-"
-string DFA red() {
-    string fire = \"Fire\";
-    start{
-        print(\"Called red()\");
-        return fire;
-        }
-}
-
-int DFA main(){
+"int DFA main(){
         int counter = 0; 
         stack<int> countDown;
         start{
@@ -28,7 +19,7 @@ int DFA main(){
             start<-*;}
         state3{
             print(\"state3\\n\");
-            print(red());
+            //print(red());
             state4<- (counter < 1);
             counter = counter - 1;
             countDown.push(1);
@@ -45,8 +36,7 @@ int DFA main(){
             return 0;
             }
 }
-/*
-string DFA red() {
+/*string DFA red() {
     string fire = \"Fire\";
     start{
         print(\"Called red()\");
