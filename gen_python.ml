@@ -62,7 +62,7 @@ let rec gen_tabs n = match n with
 
 let get_sident_name = function
     SIdent(id,scope) -> match scope with
-        NodeScope -> "boop." ^ gen_id id
+        NodeScope -> "" ^ gen_id id
         |DFAScope -> "self." ^ gen_id id
         |StateScope -> "" ^ gen_id id
 
@@ -134,7 +134,7 @@ and gen_sstmt sstmt tabs = match sstmt with
         |Datatype(_) -> gen_tabs tabs ^ get_sident_name sident ^ "= None\n"
         |Eostype(_) -> "")
    |SVarAssignDecl(dt,sident,SExprVal(sval)) -> gen_tabs tabs ^
-                            get_sident_name sident ^ " = " ^ gen_sexpr sval)
+                            get_sident_name sident ^ " = " ^ gen_sexpr sval ^ "\n")
 | SAssign(sident, sexpr) -> gen_tabs tabs ^ get_sident_name sident ^ " = " ^
    gen_sexpr sexpr ^ "\n"
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
@@ -190,7 +190,7 @@ and gen_formal_list formal_list = match formal_list with
 and gen_sstmt_list sstmt_list tabs  = match sstmt_list with
  [] -> ""
 | h::[] -> gen_sstmt h tabs
-| h::t -> gen_sstmt h tabs ^ gen_sstmt_list t tabs
+| h::t -> gen_sstmt h tabs ^  gen_sstmt_list t tabs
 
 and gen_sexpr_list sexpr_list = match sexpr_list with
  [] -> ""
@@ -334,7 +334,8 @@ let gen_sdfa_str sdfa_str =
     gen_tabs 2 ^ "self.returnVal = None\n" ^
     gen_tabs 2 ^ (gen_id sdfa_str.sdfaname) ^".now = self.start\n" ^
     gen_tabs 2 ^ "self.nexT = None\n" ^
-    gen_dfascope_VarDecls sdfa_str.svar_body 2 ^
+    (*gen_dfascope_VarDecls sdfa_str.svar_body 2 ^*)
+    gen_sstmt_list sdfa_str.svar_body 2 ^
     get_main_dfa_str (gen_id sdfa_str.sdfaname) ^ gen_tabs 2 ^ "return\n" ^ 
     gen_node_list sdfa_str.snode_body 
     (*TODO need to do gen_node_list*)
