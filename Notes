@@ -14,3 +14,9 @@ check for transitions...DONE
 return/transition mutually exclusive ... DONE
 
 return or catch all ... DONE
+
+add state() dfa/function for concurrency purposes ... DONE
+
+add push/pop/peek to code gen ... DONE
+
+enforce returnVal, nexT, and now as unoverwriteable keywords
