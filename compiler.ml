@@ -2,8 +2,8 @@ open Semantic_check
 open Gen_python
 
 let _ =
-  (* let lexbuf = Lexing.from_channel stdin in *)
-    let lexbuf = Lexing.from_string 
+  let lexbuf = Lexing.from_channel stdin in
+(*     let lexbuf = Lexing.from_string 
     "int DFA main(){
         int counter = 0; 
         start{
@@ -17,7 +17,7 @@ let _ =
         state3{
             print(\"state3\\n\");
             return 10;}
-}" in
+}"  in  *)
   let ast = Parser.program Scanner.token lexbuf in
   let sast = Semantic_check.check_program ast in
   let code = gen_program sast in

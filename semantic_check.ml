@@ -191,7 +191,7 @@ let rec check_expr env e = match e with
                     raise (Error("Mismatching types in function call")) else
                     dfa_ret)
             with Not_found ->
-                raise (Error("Undeclared Function "))
+                raise (Error("Undeclared Function: " ^ get_ident_name id))
   
 let get_node_scope env name = 
   let globalScope = match env.node_scope.parent with

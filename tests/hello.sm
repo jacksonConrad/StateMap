@@ -1,0 +1,8 @@
+int DFA main()	
+{
+	start	
+	{
+	print("Hello World!");
+	return 3;
+	}
+}
