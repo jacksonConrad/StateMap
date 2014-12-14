@@ -129,13 +129,11 @@ let find_variable env name =
     |None -> raise(Error("No Global Scope3"))
   in
     try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> try List.find(fun (s,_,_) -> s=name) globalScope.variables
-    with Not_found -> raise(Error("Variable not found in find_variable"))
+    with Not_found -> List.find(fun (s,_,_) -> s=name) globalScope.variables
 
 (*search for variable in local symbol tables*)
 let find_local_variable env name =
-    try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> raise(Error("Variable not found in find_local_variable"))
+    List.find (fun (s,_,_) -> s=name) env.node_scope.variables
 
 let peek env stack = 
     let (_,id,_)  = try find_variable env stack with
@@ -161,7 +159,7 @@ let rec check_expr env e = match e with
     | Variable(v) -> 
         let (_,s_type,_) = try find_variable env v with 
             Not_found ->
-                raise (Error("Undeclared Identifier " )) in s_type
+                raise (Error("Undeclared Identifier ")) in s_type
     | Unop(u, e) -> 
         let t = check_expr env e in 
         (match u with
@@ -510,7 +508,7 @@ let check_dfa env dfa_declaration =
       let _ = transition_check dfa_declaration.node_body in
       let (global_var_decls, penultimate_env) = get_svar_list new_env
       dfa_declaration.var_body in
-      let (checked_node_body, final_env) = get_snode_body new_env
+      let (checked_node_body, final_env) = get_snode_body penultimate_env
       dfa_declaration.node_body in
       let _ =check_final_env final_env in
       let sdfadecl = ({sreturn = dfa_declaration.return; sdfaname =
