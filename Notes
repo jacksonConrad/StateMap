@@ -25,7 +25,7 @@ make it so that callDFA code gens empty args correctly ... DONE
 
 make it so that dfas in lookup dont' get "self" appended ... DONE
 
-enforce returnVal, nexT, and now as unoverwriteable keywords
+enforce returnVal, nexT, and now, dfaDict as unoverwriteable keywords
 
 main dfa stack argument throws error in python
 
