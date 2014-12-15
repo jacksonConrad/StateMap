@@ -1,0 +1,15 @@
+// main DFA stack arg
+
+void DFA main(int a, int b, int c)	
+{
+	start	
+	{
+	print(a);
+	print(b);
+	print(c);
+
+	return;
+
+	}
+
+}

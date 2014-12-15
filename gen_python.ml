@@ -15,7 +15,7 @@ def _node_start():
     return
 
 def state(dfa):
-    return dfa._now.__name__[2:]
+    return dfa._now.__name__[6:]
 
 def concurrent(*dfasNArgs):
     dfas = [dfa(dfasNArgs[i*2+1]) for i,dfa in enumerate(dfasNArgs[::2])]
@@ -57,7 +57,7 @@ let py_end =
 
 #######END DFA DEFINITIONS          #############
 if __name__ == '__main__':
-    _main(sys.argv)
+    _main(sys.argv[1:])
 "
 
 
