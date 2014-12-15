@@ -21,15 +21,16 @@ do
 		(python "$COMPFILE" > "$OUTFILENAME") 2>> "$LOGFILE"
 		echo "\t\tDiff:\n" >> "$LOGFILE"
 		touch "$OUTFILENAME"
-		if (diff "$OUTFILENAME" "$TESTFILENAME" | tee -a "$LOGFILE") 
+		if (colordiff "$OUTFILENAME" "$TESTFILENAME" >/dev/null) 
 		then
-			echo "\t\tOK!" | tee -a "$LOGFILE"
-		else
+			colordiff -u "$OUTFILENAME" "$TESTFILENAME" | tee something
 			echo "\t\tBAD!" | tee -a "$LOGFILE"
+		else
+			echo '\t\tOK!' | tee -a "$LOGFILE"
 		fi
 	else
 		echo "\t\tBAD!\n\t\tCompilation of $TESTFILE FAILED" | tee -a "$LOGFILE"
 	fi
 	touch output.py
-	rm "$OUTFILENAME" "$COMPFILE" &>/dev/null
+	rm '$COMPFILE' "$OUTFILENAME" &>/dev/null
 done
