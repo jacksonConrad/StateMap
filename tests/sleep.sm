@@ -1,9 +1,9 @@
-int DFA main()	
+void DFA main()	
 {
 	start	
 	{
 	sleep(5);
 	print("SLEEPIN");
-	return 3;
+	return;
 	}
 }

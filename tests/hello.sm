@@ -1,8 +1,8 @@
-int DFA main()	
+void DFA main()	
 {
 	start	
 	{
 	print("Hello World!");
-	return 3;
+	return;
 	}
 }

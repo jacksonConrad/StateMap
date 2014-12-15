@@ -1,6 +1,6 @@
 // Basic stack operations
 
-int DFA main()	
+void DFA main()	
 {
 	stack<int> s;
 
@@ -21,6 +21,6 @@ int DFA main()
 
 	end {
 		print("SUCCESS");
-		return 1;
+		return;
 	}
 }

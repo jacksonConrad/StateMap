@@ -24,11 +24,11 @@ int DFA hello() {
 	}
 }
 
-int DFA main()	
+void DFA main()	
 {
 	start	
 	{
 	concurrent(get_int(), hello());
-	return 1;
+	return;
 	}
 }

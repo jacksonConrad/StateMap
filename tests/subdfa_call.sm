@@ -8,12 +8,12 @@ int DFA get_int() {
 	}
 }
 
-int DFA main()	
+void DFA main()	
 {
 	start	
 	{
 	get_int();
-	return 1;
+	return;
 	}
 }
 
