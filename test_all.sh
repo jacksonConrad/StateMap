@@ -23,10 +23,11 @@ do
 		touch "$OUTFILENAME"
 		if (colordiff "$OUTFILENAME" "$TESTFILENAME" >/dev/null) 
 		then
-			colordiff -u "$OUTFILENAME" "$TESTFILENAME" 
-			echo "BAD!" | tee -a "$LOGFILE"
-		else
+			colordiff "$OUTFILENAME" "$TESTFILENAME" 
 			echo 'OK!' | tee -a "$LOGFILE"
+		else
+			colordiff "$OUTFILENAME" "$TESTFILENAME" 
+			echo "BAD!" | tee -a "$LOGFILE"
 		fi
 	else
 		echo "BAD!\nCompilation of $TESTFILE FAILED" | tee -a "$LOGFILE"
