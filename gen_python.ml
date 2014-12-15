@@ -8,6 +8,8 @@ let py_start =
 from time import sleep
 import sys
 
+_dfa_Dict = dict()
+
 def _node_start():
     #do nothing: just exist as a function for the dfas to initially 
     #point to with `dfa._now` so that we can have correct formatting in
@@ -15,7 +17,7 @@ def _node_start():
     return
 
 def state(dfa):
-    return dfa._now.__name__[6:]
+    return _dfa_Dict[dfa]._now.__name__[6:]
 
 def concurrent(*dfasNArgs):
     dfas = [dfa(dfasNArgs[i*2+1]) for i,dfa in enumerate(dfasNArgs[::2])]
@@ -57,7 +59,7 @@ let py_end =
 
 #######END DFA DEFINITIONS          #############
 if __name__ == '__main__':
-    _main(sys.argv[1:])
+    _main(sys.argv[1:] if len(sys.argv) else [])
 "
 
 
@@ -139,6 +141,8 @@ let rec gen_sexpr sexpr = match sexpr with
 | SEosLit -> "EOS()"
 | SCall(sident, sexpr_list, d) -> match gen_id (gen_sid sident) with
     "print" -> "print(" ^ gen_sexpr_list sexpr_list ^ ")"
+
+    | "state" -> "state(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
     
@@ -235,7 +239,8 @@ let gen_sdfa_str sdfa_str =
     (*gen_dfascope_VarDecls sdfa_str.svar_body 2 ^*)
     gen_sstmt_list sdfa_str.svar_body 2 ^
     get_main_dfa_str (gen_id sdfa_str.sdfaname) ^ gen_tabs 2 ^ "return\n" ^ 
-    gen_node_list sdfa_str.snode_body ^ "\n"
+    gen_node_list sdfa_str.snode_body ^ "\n" ^
+    "_dfa_Dict[\"" ^ gen_id sdfa_str.sdfaname ^ "\"] = _" ^gen_id sdfa_str.sdfaname ^ "\n"
     (*TODO need to do gen_node_list*)
 
 let gen_sdfa_decl = function

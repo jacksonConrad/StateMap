@@ -1,0 +1,47 @@
+// Simple test to check that a subdfa can be called as a function
+
+
+void DFA sub_dfa1() {
+	start {
+		print(state("sub_dfa2"));
+		red <- *;
+	}
+
+	red {
+		print(state("sub_dfa2"));
+		blue <- *;
+	}
+
+	blue {
+		print(state("sub_dfa2"));
+		return;
+	}
+}
+
+void DFA sub_dfa2() {
+	start {
+		print(state("sub_dfa1"));
+		red <- *;
+	}
+
+	red {
+		print(state("sub_dfa1"));
+		blue <- *;
+
+	}
+
+	blue {
+		print(state("sub_dfa1"));
+		return;
+	}
+}
+
+void DFA main()	
+{
+	start	
+	{
+	concurrent(sub_dfa1(), sub_dfa2());
+	return;
+	}
+}
+

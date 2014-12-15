@@ -30,3 +30,5 @@ enforce returnVal, nexT, and now, dfaDict as unoverwriteable keywords ... DONE
 main dfa stack argument throws error in python ... CLARIFY(????)
 
 sub-dfa's not callable ... Make sure sub-dfas are defined first
+
+add self.nexT = None under returnVal
