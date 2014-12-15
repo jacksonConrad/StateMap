@@ -50,7 +50,7 @@ all:
 test:
 	make clean
 	make compile
-	sh ./test_all.sh
+	./test_all.sh
 
 run:
 	make all
