@@ -8,3 +8,4 @@ compiler
 output.py
 a.out
 log.txt
+*.swp

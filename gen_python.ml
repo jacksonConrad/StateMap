@@ -8,6 +8,8 @@ let py_start =
 from time import sleep
 import sys
 
+dfaDict = dict()
+
 def start():
     #do nothing: just exist as a function for the dfas to initially 
     #point to with `dfa.now` so that we can have correct formatting in
@@ -147,7 +149,7 @@ let rec gen_sexpr sexpr = match sexpr with
     | "concurrent" -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
     
     | _ -> let dfaname = get_sident_name sident in
-    "callDfa(" ^ dfaname ^ "," ^ gen_sexpr_list sexpr_list ^ ")" 
+    "callDfa(dfaDict[\"" ^ dfaname ^ "\"]," ^ gen_sexpr_list sexpr_list ^ ")" 
 
 and gen_sstmt sstmt tabs = match sstmt with
   SBlock(sstmt_list) ->  gen_sstmt_list sstmt_list tabs
@@ -348,7 +350,8 @@ let rec gen_unpacked_formal_list sformals index tabs = match sformals with
 
 
 let get_main_dfa_str name = match name with
-  "main" -> gen_tabs 2 ^ "while self.returnVal is None:\n" ^ gen_tabs 3 ^ "main.now()\n" ^ gen_tabs 3 ^ "main.now = self.nexT\n"
+  "main" -> gen_tabs 2 ^ "while self.returnVal is None:\n" ^ gen_tabs 3 ^
+  "dfaDict[\"main\"].now()\n" ^ gen_tabs 3 ^ "dfaDict[\"main\"].now = self.nexT\n"
   | _ -> ""
 
 let gen_sdfa_str sdfa_str =
@@ -358,12 +361,13 @@ let gen_sdfa_str sdfa_str =
     gen_tabs 1 ^ "def __init__(self,*args):\n" ^
     gen_unpacked_formal_list sdfa_str.sformals 0 2 ^
     gen_tabs 2 ^ "self.returnVal = None\n" ^
-    gen_tabs 2 ^ (gen_id sdfa_str.sdfaname) ^".now = self.start\n" ^
+    gen_tabs 2 ^ "dfaDict[\"" ^ (gen_id sdfa_str.sdfaname) ^"\"].now = self.start\n" ^
     gen_tabs 2 ^ "self.nexT = None\n" ^
     (*gen_dfascope_VarDecls sdfa_str.svar_body 2 ^*)
     gen_sstmt_list sdfa_str.svar_body 2 ^
     get_main_dfa_str (gen_id sdfa_str.sdfaname) ^ gen_tabs 2 ^ "return\n" ^ 
-    gen_node_list sdfa_str.snode_body 
+    gen_node_list sdfa_str.snode_body ^ "\n" ^
+    "dfaDict[\"" ^ gen_id sdfa_str.sdfaname ^ "\"] = " ^ gen_id sdfa_str.sdfaname ^ "\n"
     (*TODO need to do gen_node_list*)
 
 let gen_sdfa_decl = function
