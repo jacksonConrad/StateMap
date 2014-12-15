@@ -546,8 +546,11 @@ let initialize_dfas env dfa_list =
 
 let check_main env str =
   let id = Ident(str) in
-    try(find_dfa env.dfa_lookup id)
-    with Not_found -> raise(Error("Need DFA called main"))
+    let (dt, _, _, _, _) = try(find_dfa env.dfa_lookup id)
+    with Not_found -> raise(Error("Need DFA called main")) in 
+    if dt <> Datatype(Void) then
+      raise(Error("main DFA needs void return type"))
+
 
 (*Semantic checking on a program*)
 let check_program program =

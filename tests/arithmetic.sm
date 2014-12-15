@@ -1,7 +1,7 @@
 // Arithmetic
 
 
-int DFA main()	
+void DFA main()	
 {
 	start	
 	{
@@ -16,6 +16,6 @@ int DFA main()
 	int e = 12 % 5;
 	print(e);
 
-	return 1;
+	return;
 	}
 }

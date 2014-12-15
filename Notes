@@ -37,8 +37,9 @@ semantically check dfas in concurrency
 
 add string-to-int/float/input
 
+ensure main DFA has return type void...DONE
+
 iterate over command-line args and cast them into appropriate types
 
 enforce the Void DFAs return a string when run concurrently
-
 

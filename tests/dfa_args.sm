@@ -6,7 +6,7 @@ int DFA args(int a, int b) {
 	}
 }
 
-int DFA main()	
+void DFA main()	
 {
 	start	
 	{
