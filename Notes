@@ -29,11 +29,11 @@ enforce returnVal, nexT, and now, dfaDict as unoverwriteable keywords ... DONE
 
 sub-dfa's not callable ... Make sure sub-dfas are defined first ... DONE
 
-ensure main DFA has return type void
-
 add self.nexT = None under returnVal once a DFA ends ... DONE
 
 semantically check dfas in concurrency
+
+enforce that concurrent returns only strings
 
 add string-to-int/float/input
 

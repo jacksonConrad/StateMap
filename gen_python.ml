@@ -28,7 +28,7 @@ def concurrent(*dfasNArgs):
         for dfa in (set(dfas) - finishedDfas):
             dfa.__class__._now = dfa._next
         finishedDfas = set([dfa for dfa in dfas if dfa._returnVal is not None])
-    return [dfa._returnVal for dfa in dfas]
+    return [str(dfa._returnVal) for dfa in dfas]
 
 def callDfa(dfaClass, *args):
     dfaInstance = dfaClass(args)
