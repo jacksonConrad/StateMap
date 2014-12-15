@@ -11,25 +11,25 @@ do
 	LEN=$((${#TESTFILE}-3))
 	OUTFILENAME="${TESTFILE:0:$LEN}.output"
 	TESTFILENAME="${TESTFILE:0:$LEN}.out"
-	echo "\t\tCompiling ... " >> "$LOGFILE"
+	echo "Compiling ... " >> "$LOGFILE"
 	("$COMPILER" < "$TESTFILE") 2>> "$LOGFILE"
 
 	# if compilation succeeds, run output.py.
 	if (find output.py &>/dev/null)
 	then
-		echo "\t\tPython runtime output:" >> "$LOGFILE"
+		echo "Python runtime output:" >> "$LOGFILE"
 		(python "$COMPFILE" > "$OUTFILENAME") 2>> "$LOGFILE"
-		echo "\t\tDiff:\n" >> "$LOGFILE"
+		echo "Diff:\n" >> "$LOGFILE"
 		touch "$OUTFILENAME"
 		if (colordiff "$OUTFILENAME" "$TESTFILENAME" >/dev/null) 
 		then
-			colordiff -u "$OUTFILENAME" "$TESTFILENAME" | tee something
-			echo "\t\tBAD!" | tee -a "$LOGFILE"
+			colordiff -u "$OUTFILENAME" "$TESTFILENAME" 
+			echo "BAD!" | tee -a "$LOGFILE"
 		else
-			echo '\t\tOK!' | tee -a "$LOGFILE"
+			echo 'OK!' | tee -a "$LOGFILE"
 		fi
 	else
-		echo "\t\tBAD!\n\t\tCompilation of $TESTFILE FAILED" | tee -a "$LOGFILE"
+		echo "BAD!\nCompilation of $TESTFILE FAILED" | tee -a "$LOGFILE"
 	fi
 	touch output.py
 	rm '$COMPFILE' "$OUTFILENAME" &>/dev/null
