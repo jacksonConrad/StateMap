@@ -147,6 +147,14 @@ let rec gen_sexpr sexpr = match sexpr with
     | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ "*.001)"
     
     | "itos" -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
+
+    | "ftos" -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
+
+    | "stof" -> "float(" ^ gen_sexpr_list sexpr_list ^ ")"
+
+    | "stoi" -> "int(" ^ gen_sexpr_list sexpr_list ^ ")"
+
+    | "input" -> "input(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | "concurrent" -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
     

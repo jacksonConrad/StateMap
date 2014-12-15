@@ -341,6 +341,17 @@ let empty_dfa_table_initialization = {
     (*The built-in int-to-string conversion function*)
         (Datatype(String), Ident("itos"),
         [Formal(Datatype(Int),Ident("int"))],[], []);
+    (*The built-in string-to-int conversion function*)
+        (Datatype(Int), Ident("stoi"),
+        [Formal(Datatype(String),Ident("str"))],[],[]);
+    (*The built-in float-to-string converstion function*)
+        (Datatype(String), Ident("ftos"),
+        [Formal(Datatype(Float),Ident("float"))],[],[]);
+    (*The built-in string-to-float converstion function*)
+        (Datatype(Float), Ident("stof"),
+        [Formal(Datatype(String),Ident("str"))],[],[]);
+    (*The built-in get-user-input function*)
+        (Datatype(String), Ident("input"),[],[],[]);
     (*The built-in 'get state' function for concurrently running dfas *)
         (Datatype(String), Ident("state"),
         [Formal(Datatype(String),Ident("dfa"))],[],[]);
