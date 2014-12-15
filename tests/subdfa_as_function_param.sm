@@ -1,0 +1,12 @@
+int DFA print_int(int x) {
+  start {
+    return x;
+  }
+}
+
+void DFA main() {
+  start {
+    print(print_int(3));
+    return;
+  }
+}

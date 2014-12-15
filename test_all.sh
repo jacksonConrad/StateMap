@@ -35,3 +35,4 @@ do
 	touch output.py
 	rm '$COMPFILE' "$OUTFILENAME" &>/dev/null
 done
+exit 0
