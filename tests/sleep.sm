@@ -1,0 +1,9 @@
+int DFA main()	
+{
+	start	
+	{
+	sleep(5);
+	print("SLEEPIN");
+	return 3;
+	}
+}

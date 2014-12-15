@@ -106,8 +106,8 @@ let gen_binop = function
 | Gt -> ">"
 | Geq -> ">="
 | Mod -> "%"
-| And -> "and"
-| Or -> "or"
+| And -> " and "
+| Or -> " or "
 
 let gen_var_type = function
     _ -> ""
@@ -130,8 +130,8 @@ let rec gen_sexpr sexpr = match sexpr with
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
 | SVariable(sident, d) -> get_sident_name sident
 | SUnop(unop, sexpr, d) -> gen_unop unop ^ "(" ^ gen_sexpr sexpr ^ ")"
-| SBinop(sexpr1, binop, sexpr2, d) -> gen_sexpr sexpr1 ^ gen_binop binop ^
-    gen_sexpr sexpr2 
+| SBinop(sexpr1, binop, sexpr2, d) -> "(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^
+    gen_sexpr sexpr2 ^ ")" 
 | SPeek(sident,dt) -> let stackName = get_sident_name sident in
     "(" ^ stackName ^ "[0] if len(" ^ stackName ^") else EOS())"
 | SPop(sident,dt) -> let stackName = get_sident_name sident in
@@ -144,7 +144,7 @@ let rec gen_sexpr sexpr = match sexpr with
 
     | "state" -> "state(" ^ gen_sexpr_list sexpr_list ^ ")"
     
-    | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ ")"
+    | "sleep" -> "sleep(" ^ gen_sexpr_list sexpr_list ^ "*.001)"
     
     | "itos" -> "str(" ^ gen_sexpr_list sexpr_list ^ ")"
     

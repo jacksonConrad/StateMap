@@ -13,12 +13,12 @@
 %token STRING INT VOID FLOAT
 
 %right ASSIGN
-%left EQ NEQ
-%left LT GT LEQ GEQ
-%left AND OR
+%left OR
+%left AND
+%right NOT
+%left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
 %left STAR DIVIDE MOD
-%right NOT
 %right UMINUS
 %left PUSH POP PEEK
 %nonassoc LPAREN RPAREN LBRAC RBRAC

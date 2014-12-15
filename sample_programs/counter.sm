@@ -45,7 +45,6 @@ void DFA display()
 //  halfPeriod: integer to represent period/2 in ms
 void DFA clock(int halfPeriod)
 {
-	counter = 0;
 	// Start == low	
 	// Wait halfPeriod ms, then toggle
 	start
@@ -63,14 +62,12 @@ void DFA clock(int halfPeriod)
 	high
 	{
 		sleep(halfPeriod);
-		counter += 1;
-		finish <- counter > 5;
 		start 	<- *;
 	}
 
 	finish
 	{
-		return counter;
+		return;
 	}
 }
 
@@ -115,7 +112,7 @@ void DFA TFF2()
 
 void DFA main()							
 {
-	int halfPeriod = 250;
+	int halfPeriod = 1000;
 
 	start											
 	{	
