@@ -219,7 +219,7 @@ let rec get_sexpr env e = match e with
      (*  | ExprAssign(id,ex) -> SExprAssign(SIdent(id, get_node_scope env id),
       get_sexpr env ex,check_expr env e)  *)
       | Call(id, ex_list) -> let s_ex_list = List.map(fun exp -> get_sexpr env
-      exp) ex_list in SCall(SIdent(id,DFAScope),s_ex_list, check_expr env e) 
+      exp) ex_list in SCall(SIdent(id,StateScope),s_ex_list, check_expr env e) 
       | Push(id, ex) -> SPush(SIdent(id, get_node_scope env id),
       get_sexpr env ex,check_expr env e)
       | Pop(id) -> SPop(SIdent(id, get_node_scope env id), check_expr env e)

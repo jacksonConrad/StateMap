@@ -21,12 +21,12 @@ do
 		(python "$COMPFILE" > "$OUTFILENAME") 2>> "$LOGFILE"
 		echo "Diff:\n" >> "$LOGFILE"
 		touch "$OUTFILENAME"
-		if (colordiff "$OUTFILENAME" "$TESTFILENAME" >/dev/null) 
+		if (diff "$OUTFILENAME" "$TESTFILENAME" >/dev/null) 
 		then
-			colordiff "$OUTFILENAME" "$TESTFILENAME" 
+			diff "$OUTFILENAME" "$TESTFILENAME" 
 			echo 'OK!' | tee -a "$LOGFILE"
 		else
-			colordiff "$OUTFILENAME" "$TESTFILENAME" 
+			diff "$OUTFILENAME" "$TESTFILENAME" 
 			echo "BAD!" | tee -a "$LOGFILE"
 		fi
 	else

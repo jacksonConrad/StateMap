@@ -74,5 +74,6 @@ statemap.cmx : scanner.cmx parser.cmx ast.cmx
 parser.cmi : ast.cmo
 sast.cmi : ast.cmo
 
+
 lazy: 
-	make clean && make compile && ocamlrun -b ./compiler
+	make clean && make compile && ocamlrun -b ./compiler < $(FILE)
