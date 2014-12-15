@@ -27,9 +27,15 @@ make it so that dfas in lookup dont' get "self" appended ... DONE
 
 enforce returnVal, nexT, and now, dfaDict as unoverwriteable keywords ... DONE
 
-sub-dfa's not callable ... Make sure sub-dfas are defined first
+sub-dfa's not callable ... Make sure sub-dfas are defined first ... DONE
 
-add self.nexT = None under returnVal once a DFA ends
+ensure main DFA has return type void
+
+add self.nexT = None under returnVal once a DFA ends ... DONE
+
+semantically check dfas in concurrency
+
+add string-to-int/float/input
 
 iterate over command-line args and cast them into appropriate types
 

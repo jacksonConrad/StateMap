@@ -156,7 +156,8 @@ let rec gen_sexpr sexpr = match sexpr with
 and gen_sstmt sstmt tabs = match sstmt with
   SBlock(sstmt_list) ->  gen_sstmt_list sstmt_list tabs
 | SSExpr(sexpr) -> gen_tabs tabs ^ gen_sexpr sexpr ^ "\n"
-| SReturn(sexpr) -> gen_tabs tabs ^ "self._returnVal =  " ^ gen_sexpr sexpr ^ "\n"
+| SReturn(sexpr) -> gen_tabs tabs ^ "self._returnVal =  " ^ gen_sexpr sexpr ^ "\n" ^
+    gen_tabs tabs ^ "self._next = None\n"
 | SDeclaration(sdecl) -> (match sdecl with
     SVarDecl(dt,sident) -> (match dt with
         Stacktype(_) -> gen_tabs tabs ^ get_sident_name sident ^ "= list()\n"
