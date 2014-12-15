@@ -1,5 +1,11 @@
 // dfa arguments
 
+int DFA args(int a, int b) {
+	start {
+		return a + b;
+	}
+}
+
 int DFA main()	
 {
 	start	
@@ -7,11 +13,5 @@ int DFA main()
 	int x = args(1,2);
 	print(x); // 3
 	return 3;
-	}
-}
-
-int DFA args(int a, int b) {
-	start {
-		return a + b;
 	}
 }

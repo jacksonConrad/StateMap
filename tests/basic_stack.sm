@@ -15,14 +15,12 @@ int DFA main()
 		print(s.pop());  // 1
 
 		end <- EOS == s.peek();
-		print("FAIL"); 
-		return 0;
-
+    start <- *;
+		print("FAIL");
 	}
 
 	end {
 		print("SUCCESS");
 		return 1;
 	}
-
 }

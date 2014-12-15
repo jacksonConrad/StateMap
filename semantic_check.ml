@@ -189,9 +189,12 @@ let rec check_expr env e = match e with
                 let el_tys = List.map (fun exp -> check_expr env exp) e in
                 let fn_tys = List.map (fun dfa_arg-> let (_,ty,_) =
                   get_name_type_from_formal env dfa_arg in ty) dfa_args in
-                if not (el_tys = fn_tys) then
-                    raise (Error("Mismatching types in function call")) else
-                    dfa_ret)
+                if (id = Ident("print") || id = Ident("concurrent")) then
+                  dfa_ret
+                else
+                  if not (el_tys = fn_tys) then
+                      raise (Error("Mismatching types in function call")) else
+                      dfa_ret)
             with Not_found ->
                 raise (Error("Undeclared Function: " ^ get_ident_name id))
   
@@ -371,8 +374,8 @@ let rec check_stmt env stmt = match stmt with
         (SSExpr(get_sexpr env e),env)
     | Return(e) ->
         let type1=check_expr env e in
-        (if not((type1=env.return_type)) then
-            raise (Error("Incompatible Return Type")));
+        if env.return_type <> Datatype(Void) && type1 <> env.return_type then
+            raise (Error("Incompatible Return Type"));
         let new_env = {env with return_seen=true} in
         (SReturn(get_sexpr env e), new_env)
     | Ast.Declaration(decl) -> 

@@ -1,12 +1,13 @@
 %{ open Ast %}
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA RBRAC LBRAC COLON DOT
-%token PLUS MINUS TIMES DIVIDE ASSIGN STAR PUSH POP PEEK
+%token PLUS MINUS STAR DIVIDE ASSIGN STAR PUSH POP PEEK
 %token NOT
 %token EQ NEQ LT LEQ GT GEQ OR AND MOD
 %token RETURN TRANS
 %token DFA STACK
 %token <int> INT_LITERAL
 %token <string> STRING_LITERAL TYPE ID
+%token <float> FLOAT_LITERAL
 %token EOF EOS
 %token MAIN
 %token STRING INT VOID FLOAT
@@ -16,7 +17,7 @@
 %left LT GT LEQ GEQ
 %left AND OR
 %left PLUS MINUS
-%left TIMES DIVIDE MOD
+%left STAR DIVIDE MOD
 %right NOT
 %right UMINUS
 %left PUSH POP PEEK
@@ -78,6 +79,7 @@ stmt:
 	| vdecl {Declaration($1)}
   | ID ASSIGN expr SEMI { Assign(Ident($1), $3) } /*Assignment post-declaration*/
 	| expr SEMI {Expr($1)}
+  | RETURN SEMI {Return(IntLit(1))}
 
 formals_opt:
     {[]} /*nothing*/
@@ -98,12 +100,13 @@ expr_list:
 
 expr:
     INT_LITERAL    { IntLit($1)   }
-  | STRING_LITERAL { StringLit($1)}
+  | STRING_LITERAL { StringLit($1) }
+  | FLOAT_LITERAL  { FloatLit($1) }
   | ID               { Variable(Ident($1))  }
   | EOS              { EosLit }  
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
+  | expr STAR  expr  { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
@@ -117,7 +120,7 @@ expr:
   | MINUS expr %prec UMINUS { Unop(Neg, $2) }
   | NOT   expr              { Unop(Not, $2) }
   | LPAREN expr RPAREN { $2 }
-  | ID DOT POP                              { Pop(Ident($1)) } 
+  | ID DOT POP LPAREN RPAREN                { Pop(Ident($1)) } 
   | ID DOT PUSH LPAREN expr RPAREN          { Push(Ident($1), $5) }
-  | ID DOT PEEK                             { Peek(Ident($1)) } 
+  | ID DOT PEEK LPAREN RPAREN               { Peek(Ident($1)) } 
   | ID LPAREN expr_list RPAREN {Call(Ident($1), $3) (*call a sub dfa*)}

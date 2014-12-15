@@ -1,6 +1,13 @@
 // Simple test to check that a subdfa can be called as a function
 
 
+int DFA get_int() {
+	start {
+		print("get_int called");
+		return 2;
+	}
+}
+
 int DFA main()	
 {
 	start	
@@ -10,9 +17,3 @@ int DFA main()
 	}
 }
 
-int DFA get_int() {
-	start {
-		print("get_int called");
-		return 2;
-	}
-}

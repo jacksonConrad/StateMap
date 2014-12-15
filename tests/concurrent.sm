@@ -1,12 +1,4 @@
 // Concurrency test
-int DFA main()	
-{
-	start	
-	{
-	concurrent(get_int(), hello());
-	return 1;
-	}
-}
 
 int DFA get_int() {
 	start {
@@ -29,5 +21,14 @@ int DFA hello() {
 	finish {
 		print("world");
 		return 1;
+	}
+}
+
+int DFA main()	
+{
+	start	
+	{
+	concurrent(get_int(), hello());
+	return 1;
 	}
 }
