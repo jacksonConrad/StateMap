@@ -1,3 +1,5 @@
+default: all
+
 OBJS = ast.cmo parser.cmo scanner.cmo statemap.cmo
 
 statemap: $(OBJS)
@@ -34,16 +36,25 @@ sc:
 	ocamlc -c sast.mli
 	ocamlc -c semantic_check.ml
 
-default: all
 #Tack on your own targets
-.PHONY : all
-all: 
-	clean compile 
 
 .PHONY : clean
 clean:
 	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py a.out
 
+.PHONY : all
+all: 
+	make clean 
+	make compile 
+
+test:
+	make clean
+	make compile
+	sh ./test_all.sh
+
+run:
+	make all
+	./compiler < ./sample_programs/hello.sm
 
 # Generaetd by:  ocamldep *.ml *.mli
 ast.cmo :
