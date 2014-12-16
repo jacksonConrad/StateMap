@@ -1,0 +1,19 @@
+// dfa arguments
+
+void DFA main(stack<string> sONs)	
+{
+	start	
+	{
+    print <- sONs.peek() != EOS;
+	end <- *;
+	}
+    
+    print{
+        print(sONs.pop());
+        start <- *;
+    }    
+
+    end{
+        return;
+    }
+}

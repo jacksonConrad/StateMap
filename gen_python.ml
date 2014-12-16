@@ -22,7 +22,36 @@ def state(dfa):
     return _dfa_Dict[dfa]._now.__name__[6:]
 
 def makeStack(stacktype,string_of_stack):
-    return map(stacktype,string_of_stack.replace('[','').replace(']','').split(','))
+    if stacktype != str:
+        return map(stacktype,string_of_stack.replace('[','').replace(']','').split(','))
+    else:
+        if \"'\" not in string_of_stack and '\"' not in string_of_stack:
+            return map(stacktype, string_of_stack.split(','))
+        elif ('\"' not in string_of_stack or
+            (string_of_stack.find(\"'\") < string_of_stack.find('\"') and
+            string_of_stack.find(\"'\") != -1)):
+            startIndex = string_of_stack.find(\"'\")
+            endIndex = string_of_stack.find(\"'\",startIndex+1)
+            if endIndex == -1:
+                print('RuntimeError:Invalidly formatted string stack')
+                sys.exit(1)
+            return [element for element in
+            string_of_stack[:startIndex].split(',') + 
+            list(string_of_stack[startIndex+1:endIndex]) + 
+            makeStack(str,string_of_stack[endIndex+1:])
+            if element != '']
+        else:
+            startIndex = string_of_stack.find('\"')
+            endIndex = string_of_stack.find('\"',startIndex+1)
+            if endIndex == -1:
+                print('RuntimeError:Invalidly formatted string stack')
+                sys.exit(1)
+            return [element for element in
+            string_of_stack[:startIndex].split(',') + 
+            [string_of_stack[startIndex+1:endIndex]] +
+            makeStack(str,string_of_stack[endIndex+1:])
+            if element != '']
+            
 
 def concurrent(*dfasNArgs):
     dfas = [dfa(dfasNArgs[i*2+1]) for i,dfa in enumerate(dfasNArgs[::2])]
@@ -118,7 +147,7 @@ let gen_var_type = function
     Int -> "int"
     |Float -> "float"
     |String -> "str"
-    |Eos -> "EOS().type"
+    |Eos -> "type(EOS())"
     |Void -> "Void"
     |Stack -> "Stack"
 let gen_formal formal = match formal with
