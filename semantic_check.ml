@@ -184,6 +184,14 @@ let rec check_expr env e = match e with
         assignment")))); t2 (*check_expr env e*) 
     | Pop(id) -> let (_,t1,_) = (find_variable env id) in t1
     | Peek(id) -> let (_,t1,_) = (find_variable env id) in t1
+    
+    | Call(Ident("concurrent"), e_list) -> 
+            let dfaArgsList =  List.filter( function
+            Call(_,_) -> false
+            | _ -> true) e_list 
+        in
+        if dfaArgsList != [] then raise(Error("Not all arguments passed to
+        concurrent are dfas")) else Stacktype(Datatype(String))
     | Call(id, e) -> try (let (dfa_ret, dfa_name, dfa_args, dfa_var_body, dfa_node_body)  = find_dfa
     env.dfa_lookup id in
                 let el_tys = List.map (fun exp -> check_expr env exp) e in

@@ -31,7 +31,7 @@ sub-dfa's not callable ... Make sure sub-dfas are defined first ... DONE
 
 add self.nexT = None under returnVal once a DFA ends ... DONE
 
-semantically check dfas in concurrency
+semantically check dfas in concurrency ... DONE
 
 enforce that concurrent returns only strings ... DONE
 
