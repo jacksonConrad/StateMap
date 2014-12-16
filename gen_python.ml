@@ -154,8 +154,10 @@ let rec gen_sexpr sexpr = match sexpr with
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
 | SVariable(sident, d) -> get_sident_name sident
 | SUnop(unop, sexpr, d) -> gen_unop unop ^ "(" ^ gen_sexpr sexpr ^ ")"
-| SBinop(sexpr1, binop, sexpr2, d) -> "int(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^
-    gen_sexpr sexpr2 ^ ")" 
+| SBinop(sexpr1, binop, sexpr2, d) -> 
+    (match d with
+    Datatype(String) -> "(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^ gen_sexpr sexpr2 ^ ")" 
+    | _ -> "int(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^ gen_sexpr sexpr2 ^ ")")
 | SPeek(sident,dt) -> let stackName = get_sident_name sident in
     "(" ^ stackName ^ "[0] if len(" ^ stackName ^") else EOS())"
 | SPop(sident,dt) -> let stackName = get_sident_name sident in
