@@ -1,0 +1,38 @@
+void DFA v_return() {
+	start {
+		return;
+	}
+}
+
+void DFA i_return() {
+	start {
+		return 1;
+	}	
+}
+
+void DFA str_return() {
+	start {
+		return "1";
+	}	
+}
+
+void DFA main()	
+{
+	stack<string> s;
+	start	
+	{
+		s = concurrent(v_return(), i_return(), str_return());
+		pop_con <- *;
+	}
+
+	pop_con {
+		print(s.pop());
+		pop_con <- EOS != s.peek();
+		finish <- *;
+	}
+
+	finish {
+		print("Finish");
+		return;
+	}
+}

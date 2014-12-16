@@ -23,10 +23,9 @@ do
 		touch "$OUTFILENAME"
 		if (diff "$OUTFILENAME" "$TESTFILENAME" >/dev/null) 
 		then
-			diff "$OUTFILENAME" "$TESTFILENAME" 
 			echo 'OK!' | tee -a "$LOGFILE"
 		else
-			diff "$OUTFILENAME" "$TESTFILENAME" 
+			colordiff -y "$OUTFILENAME" "$TESTFILENAME" 
 			echo "BAD!" | tee -a "$LOGFILE"
 		fi
 	else
