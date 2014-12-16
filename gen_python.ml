@@ -166,7 +166,7 @@ let rec gen_sexpr sexpr = match sexpr with
     stackName ^ ".insert(0," ^ gen_sexpr sexpr ^ ")"
 | SEosLit -> "EOS()"
 | SCall(sident, sexpr_list, d) -> match gen_id (gen_sid sident) with
-    "print" -> "print(" ^ gen_sexpr_list sexpr_list ^ ")"
+    "print" -> "print " ^ gen_sexpr_list sexpr_list
 
     | "state" -> "state(" ^ gen_sexpr_list sexpr_list ^ ")"
     

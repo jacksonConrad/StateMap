@@ -1,0 +1,8 @@
+void DFA main() {
+	start {
+		print("boom");
+		print();
+		print("bang");
+		return;
+	}
+}
