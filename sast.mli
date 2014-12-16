@@ -1,6 +1,5 @@
 open Ast
 
-(* added to work with arrays *)
 type scope = 
     NodeScope
     | DFAScope
@@ -19,8 +18,6 @@ and sexpr =
     | SVariable of sident * datatype
     | SUnop of unop * sexpr * datatype
     | SBinop of sexpr * binop * sexpr * datatype
-    (* changed int to sexpr in SArrElem *)
-    (* | SExprAssign of sident * sexpr * datatype *)
     | SCall of sident * sexpr list * datatype
     | SPeek of sident * datatype
     | SPop of sident * datatype
@@ -28,9 +25,8 @@ and sexpr =
     | SEosLit
 
 type sdecl =
-	SVarDecl of datatype * sident (* put these inside decl_list for each timeblock *)
-	(* changed sexpr to svalue *)
-	| SVarAssignDecl of datatype * sident * sval (* v_assignment and put v_decl in timeblock decl_list*)
+	SVarDecl of datatype * sident
+	| SVarAssignDecl of datatype * sident * sval
 
 type sstmt = 
 	SBlock of sstmt list
