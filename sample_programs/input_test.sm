@@ -1,0 +1,8 @@
+void DFA main() {
+    start {
+        print("Hello! What's your name?");
+        string s = input();
+        print("Cool, " + s + " is your name?");
+        return;
+    }
+}
