@@ -1,0 +1,12 @@
+int num() {
+    start {
+    }
+}
+
+void DFA main() {
+    start {
+        int x = num();
+        return;
+    }
+}
+

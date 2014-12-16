@@ -31,7 +31,7 @@ void DFA main(stack<string> args)
         wakeUp      <- *;
     }
 
-    playLeague
+    hahLoser
     {
         print("You decided that enough is enough and you need to do the responsible thing. Staying in Gold tier while Lee is in Platinum simply won't do.");
 
@@ -103,12 +103,86 @@ void DFA main(stack<string> args)
         print("1) Stay in the course and tough it out.");
         print("2) Drop out of the course.");
         choice = input("\n");
+
+        dropKicked  <- choice == "2";
+        randomGroup <- choice == "1";
+    }
+
+    randomGroup
+    {
+        print("As you firmly tell yourself that you need to stay in this course")
     }
 
     kickingItInTheFrontSeat
     {
-        print("")
+        print("You inch your way to the front seat. As you place your items on the desk and prepare to sit, you hear someone behind you ask \"Dude, do you want to move more back? We can make some space. Over there, you're totally going to cramp the professor's style.\"");
+
+        print("Your angel took the form of a young man with large eyes and a scraggly beard. He looked at you and you felt like an ant being examined by a magnifying glass held by an entire committee of entomologists. You")
+
+        print("You make a choice to:");
+
+        print("1) Leave the class and find another thing to do in the timeslot.");
+        print("2) Introduce yourself.");
+        print("3) Leave and join a random group.");
+        choice = input("\n");
+
+        dropkicked  <- choice == "1";
+        randomGroup <- choice == "3";
+        goodGroup   <- choice == "2";
     }
 
+    dropkicked 
+    {
 
+    }
+
+    goodGroup 
+    {
+
+    }
+
+    whiteSpace 
+    {
+
+    }
+    
+    Lava 
+    {
+
+    }
+
+    StateMap 
+    {
+
+    }
+
+    goodEnding 
+    {
+
+    }
+    
+    forgetProject 
+    {
+
+    }
+
+    attemptCoup 
+    {
+
+    }
+
+    defenestration 
+    {
+
+    }
+
+    notOkay 
+    {
+
+    }
+
+    okaaay 
+    {
+
+    }
 }
