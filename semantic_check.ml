@@ -32,6 +32,7 @@ let basic_math t1 t2 = match (t1, t2) with
     | (Int, Float) -> (Float, true)
     | (Int, Int) -> (Int, true)
     | (Float, Float) -> (Int, true)
+    | (String, String) -> (String, true)
     | (_,_) -> (Int, false)
 
 let relational_logic t1 t2 = match (t1, t2) with
