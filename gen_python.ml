@@ -22,7 +22,36 @@ def state(dfa):
     return _dfa_Dict[dfa]._now.__name__[6:]
 
 def makeStack(stacktype,string_of_stack):
-    return map(stacktype,string_of_stack.replace('[','').replace(']','').split(','))
+    if stacktype != str:
+        return map(stacktype,string_of_stack.replace('[','').replace(']','').split(','))
+    else:
+        if \"'\" not in string_of_stack and '\"' not in string_of_stack:
+            return map(stacktype, string_of_stack.split(','))
+        elif ('\"' not in string_of_stack or
+            (string_of_stack.find(\"'\") < string_of_stack.find('\"') and
+            string_of_stack.find(\"'\") != -1)):
+            startIndex = string_of_stack.find(\"'\")
+            endIndex = string_of_stack.find(\"'\",startIndex+1)
+            if endIndex == -1:
+                print('RuntimeError:Invalidly formatted string stack')
+                sys.exit(1)
+            return [element for element in
+            string_of_stack[:startIndex].split(',') + 
+            list(string_of_stack[startIndex+1:endIndex]) + 
+            makeStack(str,string_of_stack[endIndex+1:])
+            if element != '']
+        else:
+            startIndex = string_of_stack.find('\"')
+            endIndex = string_of_stack.find('\"',startIndex+1)
+            if endIndex == -1:
+                print('RuntimeError:Invalidly formatted string stack')
+                sys.exit(1)
+            return [element for element in
+            string_of_stack[:startIndex].split(',') + 
+            [string_of_stack[startIndex+1:endIndex]] +
+            makeStack(str,string_of_stack[endIndex+1:])
+            if element != '']
+            
 
 def concurrent(*dfasNArgs):
     dfas = [dfa(dfasNArgs[i*2+1]) for i,dfa in enumerate(dfasNArgs[::2])]
@@ -113,7 +142,7 @@ let gen_var_type = function
     Int -> "int"
     |Float -> "float"
     |String -> "str"
-    |Eos -> "EOS().type"
+    |Eos -> "type(EOS())"
     |Void -> "Void"
     |Stack -> "Stack"
 let gen_formal formal = match formal with
@@ -125,8 +154,10 @@ let rec gen_sexpr sexpr = match sexpr with
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
 | SVariable(sident, d) -> get_sident_name sident
 | SUnop(unop, sexpr, d) -> gen_unop unop ^ "(" ^ gen_sexpr sexpr ^ ")"
-| SBinop(sexpr1, binop, sexpr2, d) -> "int(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^
-    gen_sexpr sexpr2 ^ ")" 
+| SBinop(sexpr1, binop, sexpr2, d) -> 
+    (match d with
+    Datatype(String) -> "(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^ gen_sexpr sexpr2 ^ ")" 
+    | _ -> "int(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^ gen_sexpr sexpr2 ^ ")")
 | SPeek(sident,dt) -> let stackName = get_sident_name sident in
     "(" ^ stackName ^ "[0] if len(" ^ stackName ^") else EOS())"
 | SPop(sident,dt) -> let stackName = get_sident_name sident in
@@ -135,7 +166,7 @@ let rec gen_sexpr sexpr = match sexpr with
     stackName ^ ".insert(0," ^ gen_sexpr sexpr ^ ")"
 | SEosLit -> "EOS()"
 | SCall(sident, sexpr_list, d) -> match gen_id (gen_sid sident) with
-    "print" -> "print(" ^ gen_sexpr_list sexpr_list ^ ")"
+    "print" -> "print " ^ gen_sexpr_list sexpr_list
 
     | "state" -> "state(" ^ gen_sexpr_list sexpr_list ^ ")"
     

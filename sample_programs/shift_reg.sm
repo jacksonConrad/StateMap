@@ -53,7 +53,7 @@ void DFA clock(int halfPeriod)
 		rising		<- *;				
 	}
 
-	// state that triggers a toggle for the TFFs
+	// state that triggers a catch for the DFFs
 	rising
 	{		
 		high  	<- *;
@@ -67,14 +67,14 @@ void DFA clock(int halfPeriod)
 }
 
 // 1st T-FlipFlop in Shift Register
-//  Toggles on every rising clock and data high
-void DFA TFF1()
+//  Catches data on every rising clock
+void DFA DFF1()
 {
 	// low output
 	start
 	{
 		high 	<- (state("clock") == "rising"
-						&& state("data") == "high");
+						&& state("dataIn") == "high");
 		start 	<- *;
 	}
 
@@ -82,20 +82,20 @@ void DFA TFF1()
 	high
 	{
 		start	<- (state("clock") == "rising"
-						&& state("data") == "high");
+						&& state("dataIn") == "low");
 		high 	<- *;
 	}		
 }
 
 // 2nd T-FlipFlop in Shift Register
-//  Toggles on every rising clock and TFF1 high
-void DFA TFF2()
+//  Catches DFF1 on every rising clock
+void DFA DFF2()
 {
 	// low output
 	start
 	{
 		high 	<- (state("clock") == "rising"
-						&& state("TFF1") == "high");
+						&& state("DFF1") == "high");
 		start 	<- *;
 	}
 
@@ -103,20 +103,20 @@ void DFA TFF2()
 	high
 	{
 		start	<- (state("clock") == "rising"
-						&& state("TFF1") == "high");
+						&& state("DFF1") == "start");
 		high 	<- *;
 	}		
 }
 
 // 3rd T-FlipFlop in Shift Register
-//  Toggles on every rising clock and TFF2 high
-void DFA TFF3()
+//  Catches DFF2 on every rising clock
+void DFA DFF3()
 {
 	// low output
 	start
 	{
 		high 	<- (state("clock") == "rising"
-						&& state("TFF2") == "high");
+						&& state("DFF2") == "high");
 		start 	<- *;
 	}
 
@@ -124,20 +124,20 @@ void DFA TFF3()
 	high
 	{
 		start	<- (state("clock") == "rising"
-						&& state("TFF2") == "high");
+						&& state("DFF2") == "start");
 		high 	<- *;
 	}		
 }
 
 // 4th T-FlipFlop in Shift Register
-//  Toggles on every rising clock and TFF3 high
-void DFA TFF4()
+//  Catches DFF3 on every rising clock
+void DFA DFF4()
 {
 	// low output
 	start
 	{
 		high 	<- (state("clock") == "rising"
-						&& state("TFF3") == "high");
+						&& state("DFF3") == "high");
 		start 	<- *;
 	}
 
@@ -145,7 +145,7 @@ void DFA TFF4()
 	high
 	{
 		start	<- (state("clock") == "rising"
-						&& state("TFF3") == "high");
+						&& state("DFF3") == "start");
 		high 	<- *;
 	}		
 }
@@ -168,28 +168,29 @@ void DFA display()
 	read
 	{
 		d = state("dataIn") == "high";
-		b1 = state("TFF1") == "high";
-		b2 = state("TFF2") == "high";
-		b3 = state("TFF3") == "high";
-		b4 = state("TFF4") == "high";
+		b1 = state("DFF1") == "high";
+		b2 = state("DFF2") == "high";
+		b3 = state("DFF3") == "high";
+		b4 = state("DFF4") == "high";
 		print <- *;
 	}
 
 	print
 	{
-		print ("About to read in bit of " + itos(d) +
-					"\n Current parallel output is " + itos(b1) + itos(b2) + itos(b3) + itos(b4));
+		print ("Current parallel output: " + itos(b1) + itos(b2) + itos(b3) + itos(b4));
+		print ("About to read in a bit of " + itos(d));
+		print ();
 		start <- *;
 	}	
 }
 
 void DFA main(stack<string> args)							
 {
-	int halfPeriod = 400;
+	int halfPeriod = 1000;
 
 	start											
 	{		
-		concurrent(clock(halfPeriod), dataIn(args), TFF1(), TFF2(), TFF3(), TFF4(), display());
+		concurrent(clock(halfPeriod), dataIn(args), DFF1(), DFF2(), DFF3(), DFF4(), display());
 		return;
 	}	
 }
