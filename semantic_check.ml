@@ -189,8 +189,18 @@ let rec check_expr env e = match e with
                 let el_tys = List.map (fun exp -> check_expr env exp) e in
                 let fn_tys = List.map (fun dfa_arg-> let (_,ty,_) =
                   get_name_type_from_formal env dfa_arg in ty) dfa_args in
-                if (id = Ident("print") || id = Ident("concurrent")) then
-                  dfa_ret
+                if (
+                    id = Ident("print") || 
+                    id = Ident("concurrent" ) ||
+                    id = Ident("itos") ||
+                    id = Ident("stoi") ||
+                    id = Ident("ftos") ||
+                    id = Ident("stof") ||
+                    id = Ident("sleep") ||
+                    id = Ident("input") ||
+                    id = Ident("state")
+                    ) 
+                then dfa_ret
                 else
                   if not (el_tys = fn_tys) then
                       raise (Error("Mismatching types in function call")) else

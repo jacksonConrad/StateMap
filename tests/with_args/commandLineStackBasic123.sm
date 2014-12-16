@@ -1,0 +1,19 @@
+void DFA main(stack<int> pleaseWork)	
+{
+	start	
+	{
+	print("Hello World!");
+    s1 <- pleaseWork.peek() != EOS;
+    end <-*;
+	}
+    
+    s1{
+    print(itos(pleaseWork.pop()));
+    start <-*;
+    }
+
+    end{
+    return;
+    }
+
+}
