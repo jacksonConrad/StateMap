@@ -1,12 +1,13 @@
-void DFA main(stack<string> args)
+void DFA main()
 {
-    setGroup = "good";
+    string setGroup = "";
+    string choice = "";
 
     start
     {
-        print("Welcome to the first Choose Your Own Adventure written in the StateMap language ever! To indicate your choices, simply hit the corresponding number and the enter key.")
-
-        input("1) Start your adventure.")
+        print("Welcome to the first Choose Your Own Adventure written in the StateMap language ever! To indicate your choices, simply hit the corresponding number and the enter key.");
+        input("1) Start your adventure.");
+        wakeUp <- *;
     }
 
     wakeUp
@@ -23,14 +24,14 @@ void DFA main(stack<string> args)
 
         print("1) Go to PLT anyway.");
         print("2) Play League and strive for Platinum!");
-        string choice = input("\n");
+        choice = input("\n");
 
         firstClass  <- choice == "1";
         hahLoser    <- choice == "2";
         print("Type 1 or 2 for your choices.");
         wakeUp      <- *;
     }
-
+        
     hahLoser
     {
         print("You decided that enough is enough and you need to do the responsible thing. Staying in Gold tier while Lee is in Platinum simply won't do.");
@@ -41,7 +42,7 @@ void DFA main(stack<string> args)
 
         input("The end.");
 
-        start    <- *;
+        returnNode    <- *;
     }
 
     firstClass
@@ -79,7 +80,7 @@ void DFA main(stack<string> args)
 
         input("The end.");
 
-        start <- *;
+        returnNode <- *;
     }
 
     sittingInTheBackSeat
@@ -106,19 +107,32 @@ void DFA main(stack<string> args)
 
         dropKicked  <- choice == "2";
         randomGroup <- choice == "1";
+        print("Type 1 or 2 to indicate your choice.");
+        sittingInTheBackSeat <- *;
     }
 
     randomGroup
     {
-        print("As you firmly tell yourself that you need to stay in this course")
+        setGroup = "bad";
+        print("As you firmly tell yourself that you need to stay in this course, you do so. You join a random group.");
+        print("What language do you guys decide on?");
+        print("1) The Whitespace Language.");
+        print("2) Lava.");
+
+        choice = input("\n");
+        whiteSpace  <- choice == "1";
+        Lava        <- choice == "2";
+        print("Type 1 or 2 to indicate your choice.");
+        randomGroup <- *;
     }
 
     kickingItInTheFrontSeat
     {
-        print("You inch your way to the front seat. As you place your items on the desk and prepare to sit, you hear someone behind you ask \"Dude, do you want to move more back? We can make some space. Over there, you're totally going to cramp the professor's style.\"");
+        print("You inch your way to the front seat. As you place your items on the desk and prepare to sit, you hear someone behind you ask \"Dude, do you want to move more back? We can make some space. I wouldn't want to cramp the professor's style.\"");
 
-        print("Your angel took the form of a young man with large eyes and a scraggly beard. He looked at you and you felt like an ant being examined by a magnifying glass held by an entire committee of entomologists. You")
+        print("Your angel took the form of a young man with large eyes and a scraggly beard. He looked at you and you felt like an ant being examined by a magnifying glass held by an entire committee of entomologists. You express your thanks and slide your seat slightly back.");
 
+        print("Footsteps resounded across the hallway and a giant of a man marched into the room. ");
         print("You make a choice to:");
 
         print("1) Leave the class and find another thing to do in the timeslot.");
@@ -129,60 +143,121 @@ void DFA main(stack<string> args)
         dropkicked  <- choice == "1";
         randomGroup <- choice == "3";
         goodGroup   <- choice == "2";
+        print("Type 1, 2, or 3 to indicate your choice.");
+        kickingItInTheFrontSeat <- *;
     }
 
     dropkicked 
     {
+        print("You drop the class.");
+        input("The end.");
 
+        returnNode <- *;
     }
 
     goodGroup 
     {
+        setGroup = "good";
+        print("You join a good group.");
 
+        print("The language you decide on is:");
+        print("1) Lava");
+        print("2) StateMap");
+        choice = input("\n");
+
+        Lava        <- choice == "1";
+        StateMap    <- choice == "2";
+        print("Type 1 or 2 to indicate your choice.");
+        goodGroup <- *;
     }
 
     whiteSpace 
     {
+        print("You attempt to make the Whitespace language. It didn't go well.");
+        input("The end.");
 
+        returnNode <- *;
     }
     
     Lava 
     {
+        print("You create the Lava language. An argument over leadership arises.");
 
+        print("1) Attempt to obtain leadership.");
+        print("2) Give up the position of leadership.");
+        choice = input("\n");
+
+        attemptCoup     <- choice == "1";
+        forgetProject   <- ((setGroup == "bad") && (choice == "2");
+        okaaay          <- ((setGroup == "good") && (choice == "2");
+        print("Type 1, 2, or 3 to indicate your choice.");
+        Lava            <- *;
     }
 
     StateMap 
     {
+        print("You pick a great language.");
+        input("Hit enter to continue.");
 
+        goodEnding      <- *;
     }
 
     goodEnding 
     {
+        print("You win at everything.");
+        input("The end.");
 
+        returnNode <- *;
     }
     
     forgetProject 
     {
+        print("Your new leader forgot the project.");
+        input("The end.");
 
+        returnNode <- *;
     }
 
     attemptCoup 
     {
+        print("You attempt to wrest control of leadership.");
+        print("Do you:");
+        print("1) Attempt diplomacy?");
+        print("2) Attempt intimidation?");
+        choice = input("\n");
 
+        defenestration  <- choice == "2";
+        notOkay         <- choice == "1";
+        print("Type 1 or 2 to indicate your choice.");
+        attemptCoup <- *;
     }
 
     defenestration 
     {
+        print("You get forcibly thrown out a window.");
 
+        input("The end.");
+        returnNode <- *;
     }
 
     notOkay 
     {
+        print("For some reason, the project wasn't very well received.");
+        input("The end.");
 
+        returnNode <- *;
     }
 
     okaaay 
     {
+        print("Your team managed to pull something out but there was a crucial error with the language itself.");
+        input("The end.");
 
+         <- *;
+    }
+
+    returnNode
+    {
+        return;
     }
 }
