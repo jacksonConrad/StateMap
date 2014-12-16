@@ -1,9 +1,9 @@
 default: all
 
-OBJS = ast.cmo parser.cmo scanner.cmo statemap.cmo
+OBJS = ast.cmo parser.cmo scanner.cmo 
 
-statemap: $(OBJS)
-	ocamlc -o statemap $(OBJS)
+ast_print: ast.cmo parser.cmo scanner.cmo ast_print.cmo
+	ocamlc -o ast_print ast.cmo parser.cmo scanner.cmo ast_print.cmo
 
 scanner.ml : scanner.mll
 	ocamllex scanner.mll
@@ -16,8 +16,6 @@ parser.ml parser.mli : parser.mly
 
 %.cmi : %.mli
 	ocamlc -w A -c $<
-
-
 
 .PHONY : compile
 compile:
@@ -40,7 +38,7 @@ sc:
 
 .PHONY : clean
 clean:
-	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py a.out
+	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py a.out ast_print
 
 .PHONY : all
 all: 
@@ -55,10 +53,13 @@ test:
 run:
 	make all
 	./compiler < ./sample_programs/hello.sm
+	python output.py
 
 # Generaetd by:  ocamldep *.ml *.mli
 ast.cmo :
 ast.cmx :
+ast_print.cmo : scanner.cmo parser.cmi ast.cmo
+ast_print.cmx : scanner.cmx parser.cmx ast.cmx
 compiler.cmo : semantic_check.cmo scanner.cmo parser.cmi gen_python.cmo
 compiler.cmx : semantic_check.cmx scanner.cmx parser.cmx gen_python.cmx
 gen_python.cmo : sast.cmi ast.cmo
@@ -73,7 +74,6 @@ statemap.cmo : scanner.cmo parser.cmi ast.cmo
 statemap.cmx : scanner.cmx parser.cmx ast.cmx
 parser.cmi : ast.cmo
 sast.cmi : ast.cmo
-
 
 lazy: 
 	make clean && make compile && ocamlrun -b ./compiler < $(FILE)

@@ -1,0 +1,12 @@
+void DFA v_dfa() {
+	start {
+		return;
+	}
+}
+
+void DFA main() {
+	start {
+		int x = v_dfa();
+		return;
+	}
+}

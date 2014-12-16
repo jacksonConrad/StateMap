@@ -18,6 +18,12 @@ string DFA get_string() {
 	}
 }
 
+void DFA get_void() {
+	start {
+		return;
+	}
+}
+
 void DFA main()	
 {
 	start	

@@ -1,0 +1,32 @@
+void DFA main()	
+{
+	int glob = 1;
+	start	
+	{
+		int x = 1 || 0;
+		print(x); // 1
+		int y = 0 || 1;
+		print(y); //1
+		int z = 0 && 0;
+		print(z); //0
+		int v = 0 && 1;
+		print(v); // 0
+		int eqeq = "yes" == "yes";
+		print(eqeq); // 1;
+
+		bool_one <- (1 && 0+1 || 0) && 0 != 5 && 4 <= 4;
+		bool_two <- *;
+	}
+
+	bool_one {
+
+		print("First");
+		bool_two <- !(!glob); 
+		bool_one <- *;
+	}
+
+	bool_two {
+		print("Second");
+		return;
+	}
+}

@@ -1,0 +1,21 @@
+// tests built in functions
+
+void DFA main() {
+	start {
+		int i = 20;
+		string s = itos(i);
+		i = stoi(s);
+
+		print(s); // "20"
+		print(i); // 20
+
+		float f = 24.8;
+		s = ftos(f);
+		f = stof(s);
+
+		print(s); // "24.8"
+		print(f); // 24.8
+
+		return;
+	}
+}

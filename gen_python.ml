@@ -105,7 +105,6 @@ let return = "return"
 let gen_id = function
   Ident(id) -> id
 
-(*WHY DO WE HAVE gen_sid and get_sident_name*)
 let gen_sid = function
   SIdent(id,dt) -> id
 
@@ -113,10 +112,6 @@ let rec gen_tabs n = match n with
   0 -> ""
   |1 -> "\t"
   | _ -> "\t"^gen_tabs (n-1)
-
-(*let get_sident_name = function
-  SIdent(id, scope) -> if scope == DFAScope then "self." ^ gen_id id 
-                        else gen_id id*)
 
 let get_sident_name = function
     SIdent(id,scope) -> match scope with
@@ -159,7 +154,7 @@ let rec gen_sexpr sexpr = match sexpr with
 | SStringLit(s, d) -> "\"" ^ s ^ "\""
 | SVariable(sident, d) -> get_sident_name sident
 | SUnop(unop, sexpr, d) -> gen_unop unop ^ "(" ^ gen_sexpr sexpr ^ ")"
-| SBinop(sexpr1, binop, sexpr2, d) -> "(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^
+| SBinop(sexpr1, binop, sexpr2, d) -> "int(" ^ gen_sexpr sexpr1 ^ gen_binop binop ^
     gen_sexpr sexpr2 ^ ")" 
 | SPeek(sident,dt) -> let stackName = get_sident_name sident in
     "(" ^ stackName ^ "[0] if len(" ^ stackName ^") else EOS())"
@@ -207,9 +202,6 @@ and gen_sstmt sstmt tabs = match sstmt with
 | STransition(sident, sexpr) -> gen_tabs tabs ^ "if(" ^ gen_sexpr sexpr ^ "):\n" ^
     gen_tabs (tabs+1) ^ "self._next = self._node_" ^ get_sident_name sident ^ "\n" ^
     gen_tabs (tabs+1) ^ "return\n"
-
-
-(*semicolon and newline handled in gen_decl since array decl assignment is actually vector push_back*)
 and gen_sdecl decl = match decl with
   SVarDecl(datatype, sident) -> "# Variable declared without assignment: " ^ get_sident_name sident ^ "\n"
 | SVarAssignDecl(datatype, sident, value) -> get_sident_name sident ^ " = " ^ gen_svalue value ^ "\n"
@@ -237,7 +229,7 @@ and gen_sexpr_list sexpr_list = match sexpr_list with
 and gen_concurrent_dfa sexpr = match sexpr with
 SCall(sident,sexpr_list,d) -> "_" ^ get_sident_name sident ^ ", [" ^
     gen_sexpr_list sexpr_list ^ "]"
-| _ -> "TODO: semantically check args of calls to concurrent()"
+| _ -> ""
 
 and gen_concurrency_list sexpr_list = match sexpr_list with
  [] -> ""
@@ -318,4 +310,3 @@ let gen_sdfa_decl_list sdfa_decl_list =
 
 let gen_program = function
   Prog(sdfa_decl_list) -> py_start ^ gen_sdfa_decl_list sdfa_decl_list ^ py_end
- 

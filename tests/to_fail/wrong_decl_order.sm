@@ -1,0 +1,12 @@
+void DFA main() {
+	start {
+		int x = i_dfa();
+		return;
+	}
+}
+
+int DFA i_dfa() {
+	start {
+		return 1;
+	}
+}

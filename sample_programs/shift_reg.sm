@@ -1,0 +1,196 @@
+//4-bit SIPO Shift Register
+//	Data input given as a command line argument of 0s and 1s separted by commas.
+//	Will accept any reasonably lengthed input. 
+
+void DFA dataIn(stack<string> data)
+{
+	int counter = 0;
+
+	//Read state
+	start
+	{
+		counter = 0;
+		low <- data.peek() == EOS;
+		string currData = data.pop();
+		high <- currData == "1";
+		low  <- currData == "0";
+		error <- *;
+	}
+
+	//high and low states to represent the current data input
+	//	counter is used for synchronicity
+	high
+	{
+		start <- counter == 1;
+		counter = counter + 1;
+		high <- *;
+	}
+
+	low
+	{
+		start <- counter == 1;
+		counter = counter + 1;
+		low <- *;
+	}
+
+	error
+	{
+		print("invalid input");
+		return;
+	}	
+}
+
+
+// DFA to represent a clock
+//  halfPeriod: integer to represent period/2 in ms
+void DFA clock(int halfPeriod)
+{
+	// Start == low	
+	// Wait halfPeriod ms, then toggle
+	start
+	{		
+		sleep(halfPeriod);
+		rising		<- *;				
+	}
+
+	// state that triggers a catch for the DFFs
+	rising
+	{		
+		high  	<- *;
+	}			
+	
+	high
+	{
+		sleep(halfPeriod);
+		start 	<- *;
+	}	
+}
+
+// 1st T-FlipFlop in Shift Register
+//  Catches data on every rising clock
+void DFA DFF1()
+{
+	// low output
+	start
+	{
+		high 	<- (state("clock") == "rising"
+						&& state("dataIn") == "high");
+		start 	<- *;
+	}
+
+	// high output
+	high
+	{
+		start	<- (state("clock") == "rising"
+						&& state("dataIn") == "low");
+		high 	<- *;
+	}		
+}
+
+// 2nd T-FlipFlop in Shift Register
+//  Catches DFF1 on every rising clock
+void DFA DFF2()
+{
+	// low output
+	start
+	{
+		high 	<- (state("clock") == "rising"
+						&& state("DFF1") == "high");
+		start 	<- *;
+	}
+
+	// high output
+	high
+	{
+		start	<- (state("clock") == "rising"
+						&& state("DFF1") == "start");
+		high 	<- *;
+	}		
+}
+
+// 3rd T-FlipFlop in Shift Register
+//  Catches DFF2 on every rising clock
+void DFA DFF3()
+{
+	// low output
+	start
+	{
+		high 	<- (state("clock") == "rising"
+						&& state("DFF2") == "high");
+		start 	<- *;
+	}
+
+	// high output
+	high
+	{
+		start	<- (state("clock") == "rising"
+						&& state("DFF2") == "start");
+		high 	<- *;
+	}		
+}
+
+// 4th T-FlipFlop in Shift Register
+//  Catches DFF3 on every rising clock
+void DFA DFF4()
+{
+	// low output
+	start
+	{
+		high 	<- (state("clock") == "rising"
+						&& state("DFF3") == "high");
+		start 	<- *;
+	}
+
+	// high output
+	high
+	{
+		start	<- (state("clock") == "rising"
+						&& state("DFF3") == "start");
+		high 	<- *;
+	}		
+}
+
+// display DFA to read and print out the current state of
+//	the shift register
+void DFA display()
+{
+	int d = 0;
+	int b1 = 0;
+	int b2 = 0;
+	int b3 = 0;
+	int b4 = 0;
+
+	start
+	{
+		read <- *;
+	}
+
+	read
+	{
+		d = state("dataIn") == "high";
+		b1 = state("DFF1") == "high";
+		b2 = state("DFF2") == "high";
+		b3 = state("DFF3") == "high";
+		b4 = state("DFF4") == "high";
+		print <- *;
+	}
+
+	print
+	{
+		print ("Current parallel output: " + itos(b1) + itos(b2) + itos(b3) + itos(b4));
+		print ("About to read in a bit of " + itos(d));
+		print ();
+		start <- *;
+	}	
+}
+
+void DFA main(stack<string> args)							
+{
+	int halfPeriod = 1000;
+
+	start											
+	{		
+		concurrent(clock(halfPeriod), dataIn(args), DFF1(), DFF2(), DFF3(), DFF4(), display());
+		return;
+	}	
+}

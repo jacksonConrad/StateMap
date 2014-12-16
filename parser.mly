@@ -41,7 +41,6 @@ var_type:
 ret_type:
     var_type {Datatype($1)} |
     STACK LT var_type GT {Stacktype(Datatype($3))}
-
     
 dfa_decl:
     ret_type DFA ID LPAREN formals_opt RPAREN LBRACE vdecl_list node_list RBRACE

@@ -1,0 +1,26 @@
+// namespace for states should contain names of built in functions
+void DFA main() {
+	start {
+		itos <- *;
+	}
+
+	itos {
+		print(1);
+		ftos <- *;
+	}
+
+	ftos {
+		print(2);
+		stoi <- *;
+	}
+
+	stoi {
+		print(3);
+		stof <- *;
+	}
+
+	stof {
+		print(4);
+		return;
+	}
+}
