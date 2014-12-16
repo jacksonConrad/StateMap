@@ -1,0 +1,17 @@
+void DFA duplicate() {
+	start {
+		return;
+	}
+}
+
+void DFA duplicate() {
+	start {
+		return;
+	}
+}
+
+void DFA main() {
+	start {
+		return;
+	}
+}

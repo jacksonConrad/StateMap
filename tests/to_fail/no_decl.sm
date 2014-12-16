@@ -1,0 +1,6 @@
+void DFA main() {
+	start {
+	 	b = 1;
+		return;
+	}
+}

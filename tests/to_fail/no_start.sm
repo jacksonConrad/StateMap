@@ -1,0 +1,5 @@
+void DFA main() {
+	state1 {
+		return;
+	}
+}

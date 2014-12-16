@@ -97,7 +97,7 @@ let update_variable env (name, datatype, value) =
         try
         let globalScope = match env.node_scope.parent with
         Some scope -> scope
-        | None -> raise(Error("No Global Scope1"))
+        | None -> raise(Error("No Global Scope"))
         in  
         (fun node_scope -> ((List.find (fun (s,_,_) -> s=name)
         node_scope),2)) globalScope.variables
@@ -384,7 +384,7 @@ let empty_environment = {return_type = Datatype(Void); return_seen = false;
 let find_global_variable env name =
   let globalScope = match env.node_scope.parent with
   Some scope -> scope 
-    | None -> raise (Error("No global scope5")) in
+    | None -> raise (Error("No global scope")) in
     try List.find (fun (s,_,_) -> s=name) globalScope.variables
     with Not_found -> raise (Error("error in find_global_variable"))
 
