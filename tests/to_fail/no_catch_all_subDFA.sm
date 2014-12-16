@@ -1,4 +1,4 @@
-int num() {
+int DFA num() {
     start {
     }
 }
