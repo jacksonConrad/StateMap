@@ -1,4 +1,4 @@
-//Synchronous Counter with 2 T-Flip-Flops and Display 
+//Synchronous Counter with 3 T-Flip-Flops (0 to 7) and Display
 
 //	Prints a number to standard out based on
 // 	 states of the TFFs
@@ -6,40 +6,85 @@ void DFA display()
 {
 	start
 	{
-		print0 	<- (state("clock") == "rising" && state("TFF1") == "high" && state("TFF2") == "high");	
-		print1 	<- (state("clock") == "rising" && state("TFF1") == "start" && state("TFF2") == "start");
-		print2 	<- (state("clock") == "rising" && state("TFF1") == "high" && state("TFF2") == "start");
-		print3 	<- (state("clock") == "rising" && state("TFF1") == "start" && state("TFF2") == "high");
-		start 	<- *;
+		print0 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "high" 
+							&& state("TFF2") == "high" 
+								&& state("TFF3") == "high");	
+		print1 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "start" 
+							&& state("TFF2") == "start"
+								&& state("TFF3") == "start");
+		print2 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "high" 
+							&& state("TFF2") == "start"
+								&& state("TFF3") == "start");
+		print3 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "start" 
+							&& state("TFF2") == "high"
+								&& state("TFF3") == "start");
+		print4	<- (state("clock") == "rising" 
+						&& state("TFF1") == "high" 
+							&& state("TFF2") == "high"
+								&& state("TFF3") == "start");
+		print5 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "start" 
+							&& state("TFF2") == "start"
+								&& state("TFF3") == "high");
+		print6 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "high" 
+							&& state("TFF2") == "start"
+								&& state("TFF3") == "high");
+		print7 	<- (state("clock") == "rising" 
+						&& state("TFF1") == "start" 
+							&& state("TFF2") == "high"
+								&& state("TFF3") == "high");
+		start 	<- *;		
 	}
 
 	print0
 	{
-		print("0\n");
+		print("0");
 		start 	<- *;
 	}
 
 	print1
 	{
-		print("1\n");
+		print("1");
 		start 	<- *;
 	}
 
 	print2
 	{
-		print("2\n");
+		print("2");
 		start 	<- *;
 	}
 
 	print3
 	{
-		print("3\n");
+		print("3");
+		start 	<- *;
+	}
+	print4
+	{
+		print("4");
+		start 	<- *;
+	}
+	print5
+	{
+		print("5");
+		start 	<- *;
+	}
+	print6
+	{
+		print("6");
+		start 	<- *;
+	}
+	print7
+	{
+		print("7");
 		start 	<- *;
 	}	
 }
-
-
-
 
 // DFA to represent a clock
 //  halfPeriod: integer to represent period/2 in ms
@@ -48,7 +93,7 @@ void DFA clock(int halfPeriod)
 	// Start == low	
 	// Wait halfPeriod ms, then toggle
 	start
-	{
+	{		
 		sleep(halfPeriod);
 		rising		<- *;				
 	}
@@ -63,12 +108,7 @@ void DFA clock(int halfPeriod)
 	{
 		sleep(halfPeriod);
 		start 	<- *;
-	}
-
-	finish
-	{
-		return;
-	}
+	}	
 }
 
 // 1st T-FlipFlop in counter
@@ -97,26 +137,51 @@ void DFA TFF2()
 	// low output
 	start
 	{
-		high	<-(state("clock") == "rising" && state("TFF1") == "high");
+		high	<-(state("clock") == "rising" 
+					&& state("TFF1") == "high");
 		start 	<- *;
 	}
 
 	// high output
 	high
 	{
-		start	<-(state("clock") == "rising" && state("TFF1") == "high");
+		start	<-(state("clock") == "rising" 
+					&& state("TFF1") == "high");
 		high 	<- *;
 	}		
 }
 
+// 3rd T-FlipFlop in counter
+//	Toggles on every clock only if TFF1 AND TTF2 is high
+void DFA TFF3()
+{
+	// low output
+	start
+	{
+		high	<-(state("clock") == "rising" 
+					&& state("TFF1") == "high"
+						&& state("TFF2") == "high");
+		start 	<- *;
+	}
+
+	// high output
+	high
+	{
+		start	<-(state("clock") == "rising" 
+					&& state("TFF1") == "high"
+						&& state("TFF2") == "high");
+		high 	<- *;
+	}		
+}
 
 void DFA main()							
 {
-	int halfPeriod = 1000;
+	int halfPeriod = 400;
 
 	start											
 	{	
-		concurrent(clock(halfPeriod), TFF1(), TFF2(), display());
+		print("0");
+		concurrent(clock(halfPeriod), TFF1(), TFF2(), TFF3(), display());
 		return;
 	}	
 }

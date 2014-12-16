@@ -17,8 +17,6 @@ parser.ml parser.mli : parser.mly
 %.cmi : %.mli
 	ocamlc -w A -c $<
 
-
-
 .PHONY : compile
 compile:
 	ocamlc -g ast.ml
@@ -55,6 +53,7 @@ test:
 run:
 	make all
 	./compiler < ./sample_programs/hello.sm
+	python output.py
 
 # Generaetd by:  ocamldep *.ml *.mli
 ast.cmo :
@@ -73,7 +72,6 @@ statemap.cmo : scanner.cmo parser.cmi ast.cmo
 statemap.cmx : scanner.cmx parser.cmx ast.cmx
 parser.cmi : ast.cmo
 sast.cmi : ast.cmo
-
 
 lazy: 
 	make clean && make compile && ocamlrun -b ./compiler < $(FILE)
