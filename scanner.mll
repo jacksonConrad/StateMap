@@ -54,5 +54,4 @@ and comment = parse
 
 and singleComment = parse
   '\n' { token lexbuf }
-| eof  { EOF }
 | _    { singleComment lexbuf }

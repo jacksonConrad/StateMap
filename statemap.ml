@@ -1,7 +1,5 @@
 type action = Ast 
 
-(* Raw | Interpret | Bytecode | Compile *)
-
 let _ =
   let action = Ast in
   let lexbuf = Lexing.from_channel stdin in
