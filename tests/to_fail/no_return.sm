@@ -1,0 +1,17 @@
+int DFA loop() {
+    start {
+        bounce <- *;
+    }
+
+    bounce {
+        start <- *;
+    }
+}
+
+void DFA main() {
+    start {
+        int x = loop();
+        return;
+    }
+}
+
