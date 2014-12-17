@@ -184,7 +184,7 @@ let rec gen_sexpr sexpr = match sexpr with
 
     | "stoi" -> "int(" ^ gen_sexpr_list sexpr_list ^ ")"
 
-    | "input" -> "input(" ^ gen_sexpr_list sexpr_list ^ ")"
+    | "input" -> "raw_input(" ^ gen_sexpr_list sexpr_list ^ ")"
     
     | "concurrent" -> "concurrent(" ^ gen_concurrency_list sexpr_list ^")" 
     
