@@ -1,0 +1,38 @@
+// Run with two command line integers separated by commas
+//		python output.py 9,3
+
+void DFA main(stack<string> args)	
+{
+	int a = stoi(args.pop());
+	int b = stoi(args.pop());
+
+	start
+	{			
+		s1		<- *;		
+	}
+
+	s1
+	{
+		s2	<-	a > b;
+		s3	<-	a < b;
+		s4	<-	*; 
+	}		
+
+	s2
+	{
+		a = a - b;
+		s1	<- *;
+	}
+
+	s3
+	{
+		b = b - a;
+		s1	<- *;
+	}
+
+	s4
+	{
+		print (itos(a));
+		return;
+	}
+}
