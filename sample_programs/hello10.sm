@@ -1,0 +1,22 @@
+void DFA main()	
+{
+	int count = 0;
+		
+	start	
+	{
+		hello 		<- count < 10;
+		finished	<-	*;
+	}
+
+	hello
+	{
+		print("Hello World!");
+		count = count + 1;
+		start	<-	*;			
+	}
+
+	finished
+	{
+		return;
+	}
+}
