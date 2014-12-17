@@ -5,22 +5,22 @@ void DFA main()
 
     start
     {
-        print("Welcome to the first Choose Your Own Adventure written in the StateMap language ever! To indicate your choices, simply hit the corresponding number and the enter key.");
-        input("1) Start your adventure.");
+        print("Welcome to the first Choose Your Own Adventure written in the StateMap language ever! \nTo indicate your choices, simply hit the corresponding number and the enter key.");
+        input("1) Start your adventure.\n");
         wakeUp <- *;
     }
 
     wakeUp
     {
-        print("It's only the first day of school and you're already struggling with the question: Should I stay or should I go?");
+        print("\nOnly the first day of school and you're already struggling with the question: Should I stay or should I go?\n");
 
-        print("It's 3:30 PM and you're lying in bed. The sun gleams through the room-wide window placed directly over the bedpost onto your eyes, causing you to uncomfortably roll onto the floor. Your prior Circuits class has placed you in a deep stupor near impossible to shake.");
+        print("It's 3:30 PM and you're lying in bed. The sun gleams through the room-wide window placed directly over the bedpost onto your eyes, causing you to uncomfortably roll onto the floor. Your prior Circuits class has placed you in a deep stupor near impossible to shake.\n");
 
-        print("As you trudge towards the bathroom, you think to yourself - Surely going to that PLT class in this state would be a waste. I wouldn't retain anything. Lectures will be posted online anyway. My friends will have notes. No one else goes. He won't take attendance. Class participation isn't graded.");
+        print("As you trudge towards the bathroom, you think to yourself - Surely going to that PLT class in this state would be a waste. I wouldn't retain anything. Lectures will be posted online anyway. My friends will have notes. No one else goes. He won't take attendance. Class participation isn't graded.\n");
 
-        print("Furthermore, during the last days of summer, you were just a few games away from hitting Platinum tier in the PC game League of Legends. The end of the season approaches and Kenny has been laughing at you for not hitting Platinum sooner than Lee.");
+        print("Furthermore, during the last days of summer, you were just a few games away from hitting Platinum tier in the PC game League of Legends. The end of the season approaches and Kenny has been laughing at you for not hitting Platinum sooner than Lee.\n");
 
-        print("What will you do?:");
+        print("What will you do?:\n");
 
         print("1) Go to PLT anyway.");
         print("2) Play League and strive for Platinum!");
@@ -32,30 +32,30 @@ void DFA main()
         wakeUp      <- *;
     }
         
-    hahLoser
+     hahLoser
     {
-        print("You decided that enough is enough and you need to do the responsible thing. Staying in Gold tier while Lee is in Platinum simply won't do.");
+        print("\nYou decided that enough is enough and you need to do the responsible thing. Staying in Gold tier while Lee is in Platinum simply won't do.\n");
 
-        print("You skipped the very first day of PLT to play League of Legends. Unfortunately every one of the games you played somehow had an incredibly fed Master Yi killing your entire team. Furthermore, you ended up dropping PLT, which turned out to be a required course. For shame.");
+        print("You skipped the very first day of PLT to play League of Legends. Unfortunately every one of the games you played somehow had an incredibly fed Master Yi killing your entire team. Furthermore, you ended up dropping PLT, which turned out to be a required course. For shame.\n");
 
-        print("You live life in regret, wondering about what could've been.");
+        print("You live life in regret, wondering about what could've been.\n");
 
-        input("The end.");
+        input("The end.\n");
 
         returnNode    <- *;
     }
 
     firstClass
     {
-        print("You decided that it's probably a bad idea to skip the first day to play League. Platinum can wait.");
+        print("\nYou decided that it's probably a bad idea to skip the first day to play League. Platinum can wait.\n");
 
-        print("A curtain of heat brush against your face as you walk into the large square room of Mudd 535. It just hit 4 o'clock and class is supposed to start in ten minutes. The room is overflowing with students - you can see piles of students conglomerating in the back where the seats are closest and even more bursting out through the doors on the side into the hallways.");
+        print("A curtain of heat brush against your face as you walk into the large square room of Mudd 535. It just hit 4 o'clock and class is supposed to start in ten minutes. The room is overflowing with students - you can see piles of students conglomerating in the back where the seats are closest and even more bursting out through the doors on the side into the hallways.\n");
 
-        print("You notice that despite the shortage of places to sit, a left-handed seat at the front remains unclaimed. This chair wasn't near the front; it WAS at the front, almost touching the Instructor desk. You would literally be staring up the instructor's nostrils if he lectured there. Sitting here would certainly make you the class pariah.");
+        print("You notice that despite the shortage of places to sit, a left-handed seat at the front remains unclaimed. This chair wasn't near the front; it WAS at the front, almost touching the Instructor desk. You would literally be staring up the instructor's nostrils if he lectured there. Sitting here would certainly make you the class pariah.\n");
 
-        print("You also notice an open seat in the very back corner. While you don't know the exact path needed to reach that seat, you're certain that it'll involve physically climbing over the hoards of students around there.");
+        print("You also notice an open seat in the very back corner. While you don't know the exact path needed to reach that seat, you're certain that it'll involve physically climbing over the hoards of students around there.\n");
 
-        print("As you wrestle with your decision, you feel the oppressive heat bear down on you. The air thickens, and you struggle to take a breath. Weakened, you notice that several students are sitting on large window-sills. One of the open windows has an open window-sill, and you can practically feel the wind blowing through the wide frame on your face.");
+        print("As you wrestle with your decision, you feel the oppressive heat bear down on you. The air thickens, and you struggle to take a breath. Weakened, you notice that several students are sitting on large window-sills. One of the open windows has an open window-sill, and you can practically feel the wind blowing through the wide frame on your face.\n");
 
         print("You choose to:");
 
@@ -68,36 +68,36 @@ void DFA main()
         kickingItInTheFrontSeat <- choice == "3";
         sittingInTheBackSeat    <- choice == "1";
         defenestration          <- choice == "2";
-        print("Type 1, 2, or 3 to indicate your response.");
+        print("Type 1, 2, or 3 to indicate your response.\n");
         firstClass              <- *;
     }
 
     defenestration
     {
-        print("You hastily make your way to the window-sill. Perching yourself onto the jutting shelf, you feel refreshed by the cool winds blowing through the large opening. Stretching back and leaning on the frame, you yawn and wait for class to start.");
+        print("\nYou hastily make your way to the window-sill. Perching yourself onto the jutting shelf, you feel refreshed by the cool winds blowing through the large opening. Stretching back and leaning on the frame, you yawn and wait for class to start.\n");
 
-        print("On 4:09 PM, a man with blazing eyes charges into the room, gripping a netbook. His sudden approach startles you and you attempt to straighten up from your eased position. In doing so, you managed to slip and fall out of the window. As the ground rises up to meet you, you think to yourself: That's one way to drop out of school.");
+        print("On 4:09 PM, a man with blazing eyes charges into the room, gripping a netbook. His sudden approach startles you and you attempt to straighten up from your eased position. In doing so, you managed to slip and fall out of the window. As the ground rises up to meet you, you think to yourself: That's one way to drop out of school.\n");
 
-        input("The end.");
+        input("The end.\n");
 
         returnNode <- *;
     }
 
     sittingInTheBackSeat
     {
-        print("You claw your way towards the seat in the back, needing to step on the desks of several students along the way, much to their distate. As soon as you make it there, you immediately regret your decision. The air back here is noticeably more dense, and you note that the students around you seem dazed and unfocused. The desks here are of an older make, with scrawlings from past bored students who have graduated years ago.");
+        print("\nYou claw your way towards the seat in the back, needing to step on the desks of several students along the way, much to their distate. As soon as you make it there, you immediately regret your decision. The air back here is noticeably more dense, and you note that the students around you seem dazed and unfocused. The desks here are of an older make, with scrawlings from past bored students who have graduated years ago.\n");
 
-        print("Class hasn't even started yet and you feel a heavy weight pulling your eyelids down. The room is bustling with conversation, but most of it is loaded in the middle and front. If you stayed here for an entire lecture, you'd surely go comatose.");
+        print("Class hasn't even started yet and you feel a heavy weight pulling your eyelids down. The room is bustling with conversation, but most of it is loaded in the middle and front. If you stayed here for an entire lecture, you'd surely go comatose.\n");
 
-        print("The sound of quick footsteps made their way towards the back, and you look up to see a tall figure laying something down on the desk at front. While it's difficult to see much from your location, you pick out a green shirt tucked into khaki slacks and glasses. For a moment, you cease thinking about oven analogies and focus on the newcomer.");
+        print("The sound of quick footsteps made their way towards the back, and you look up to see a tall figure laying something down on the desk at front. While it's difficult to see much from your location, you pick out a green shirt tucked into khaki slacks and glasses. For a moment, you cease thinking about oven analogies and focus on the newcomer.\n");
 
-        print("\"Okay, so I'm Stephen Edwards. This is Programming Languages and Translators - COMS 4115, all that good stuff. Fall 2014. You've figured that stuff out. My goal today is to convince you all not to take this class because obviously there are far too many of you ...\" Light chuckles and murmurs of agreement follow this statement, especially from the people attempting to see the speaker through the doors leading into the hallways.");
+        print("\"Okay, so I'm Stephen Edwards. This is Programming Languages and Translators - COMS 4115, all that good stuff. Fall 2014. You've figured that stuff out. My goal today is to convince you all not to take this class because obviously there are far too many of you ...\" Light chuckles and murmurs of agreement follow this statement, especially from the people attempting to see the speaker through the doors leading into the hallways.\n");
 
-        print("\"... Final project presentations are due during the finals week ... there's going to be a huge final project report due December 17th ...\" Already you're beginning to feel uncomfortable about this class. You dread public speaking. You dread massive, final reports.");
+        print("\"... Final project presentations are due during the finals week ... there's going to be a huge final project report due December 17th ...\" Already you're beginning to feel uncomfortable about this class. You dread public speaking. You dread massive, final reports.\n");
 
-        print("He continued, \"So, the main thing you're going to do in this class, assuming that you don't drop it like I want you to, is a semester long TEAM project. This is a team programming project. Now, the team part of it is easily the worst, most difficult aspect of all of it, but just to make it more difficult, I'm going to make you design and implement your own language and a compiler for it ... you're going to have to work with other human beings. This really sucks.\"");
+        print("He continued, \"So, the main thing you're going to do in this class, assuming that you don't drop it like I want you to, is a semester long TEAM project. This is a team programming project. Now, the team part of it is easily the worst, most difficult aspect of all of it, but just to make it more difficult, I'm going to make you design and implement your own language and a compiler for it ... you're going to have to work with other human beings. This really sucks.\"\n");
 
-        print("At this point, you're strongly considering packing up and leaving. You don't know anyone in this class and stepping on people's desk did not make a great first impression on your prospective classmates. As you sit through the rest of the lecture and attempt to focus on Professor Edwards' words through your rising panic, you've come to a decision.");
+        print("At this point, you're strongly considering packing up and leaving. You don't know anyone in this class and stepping on people's desk did not make a great first impression on your prospective classmates. As you sit through the rest of the lecture and attempt to focus on Professor Edwards' words through your rising panic, you've come to a decision.\n");
 
         print("You've decided to:");
 
@@ -105,9 +105,9 @@ void DFA main()
         print("2) Drop out of the course.");
         choice = input("\n");
 
-        dropKicked  <- choice == "2";
+        dropkicked  <- choice == "2";
         randomGroup <- choice == "1";
-        print("Type 1 or 2 to indicate your choice.");
+        print("Type 1 or 2 to indicate your choice.\n");
         sittingInTheBackSeat <- *;
     }
 
@@ -128,7 +128,7 @@ void DFA main()
 
     kickingItInTheFrontSeat
     {
-        print("You inch your way to the front seat. As you place your items on the desk and prepare to sit, you hear someone behind you ask \"Dude, do you want to move more back? We can make some space. I wouldn't want to cramp the professor's style.\"");
+        print("\nYou inch your way to the front seat. As you place your items on the desk and prepare to sit, you hear someone behind you ask \"Dude, do you want to move more back? We can make some space. I wouldn't want to cramp the professor's style.\"");
 
         print("Your angel took the form of a young man with large eyes and a scraggly beard. He looked at you and you felt like an ant being examined by a magnifying glass held by an entire committee of entomologists. You express your thanks and slide your seat slightly back.");
 
@@ -188,8 +188,8 @@ void DFA main()
         choice = input("\n");
 
         attemptCoup     <- choice == "1";
-        forgetProject   <- ((setGroup == "bad") && (choice == "2");
-        okaaay          <- ((setGroup == "good") && (choice == "2");
+        forgetProject   <- ((setGroup == "bad") && (choice == "2"));
+        okaaay          <- ((setGroup == "good") && (choice == "2"));
         print("Type 1, 2, or 3 to indicate your choice.");
         Lava            <- *;
     }
@@ -253,11 +253,12 @@ void DFA main()
         print("Your team managed to pull something out but there was a crucial error with the language itself.");
         input("The end.");
 
-         <- *;
+        returnNode <- *;
     }
 
     returnNode
     {
         return;
     }
+    
 }
