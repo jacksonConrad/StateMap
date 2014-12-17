@@ -1,7 +1,8 @@
 /* A StateMap DFA that accepts the 
 reg ex (ab|c*)d* */
 void DFA main(stack<string> args) {
-    int accepted = 1; // acceptance state if reach end of stack
+    int accepted = 1; /* acceptance 
+        state if reach end of stack*/
 
     start {
         string s = args.peek();
