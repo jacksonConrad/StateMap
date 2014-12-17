@@ -1,0 +1,65 @@
+/* A StateMap DFA that accepts the 
+reg ex (ab|c*)d* */
+void DFA main(stack<string> args) {
+    int accepted = 1; // acceptance state if reach end of stack
+
+    start {
+        string s = args.peek();
+        
+        stateOne    <- s == "a";
+        stateTwo    <- s == "c";
+        stateThree  <- s == "d";
+        accept      <- s == EOS;
+        notAccept   <- *;
+    }
+
+    stateOne {
+        accepted = 0;
+        args.pop();
+        string s = args.peek();
+
+        stateFour   <- s == "b";
+        notAccept   <- *;
+    }
+
+    stateTwo {
+        accepted = 1;
+        args.pop();
+        string s = args.peek();
+        
+        stateThree  <- s == "d";
+        stateTwo    <- s == "c";
+        accept      <- s == EOS;
+        notAccept   <- *;
+    }
+
+    stateThree {
+        accepted = 1;
+        args.pop();
+        string s = args.peek();
+
+        stateThree  <- s == "d";
+        accept      <- s == EOS;
+        notAccept   <- *;
+    }
+
+    stateFour {
+        accepted = 1;
+        args.pop();
+        string s = args.peek();
+
+        stateThree  <- s == "d";
+        accept      <- s == EOS;
+        notAccept   <- *;
+    }
+
+    notAccept {
+        print("Not accepted by the DFA");
+        return;
+    }
+
+    accept {
+        print("Accepted by the DFA.");
+        return;
+    }
+}
