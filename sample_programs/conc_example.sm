@@ -1,0 +1,51 @@
+void DFA a() 
+{
+        start 
+        {
+                print("DFA a: start");
+                afinish <- state("b") == "b2"; 
+                start <- *;
+        }
+
+        afinish 
+        {
+                print ("DFA a is done.");
+                return;
+        }        
+}
+
+void DFA b() 
+{
+        start 
+        {
+                print("DFA b: start");
+                b1 <- *;
+        }
+
+        b1 
+        {
+                print("DFA b: b1");
+                b2 <- *;
+        }
+
+        b2
+        {
+                print("DFA b: b2");
+                bfinish <- *;
+        }
+
+        bfinish
+        {
+                print ("DFA b is done.");
+                return;
+        }
+}
+
+void DFA main()
+{
+        start
+        {
+                concurrent(a(), b());
+                return;
+        }
+}
