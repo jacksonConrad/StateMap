@@ -112,12 +112,12 @@ let update_variable env (name, datatype, value) =
     in new_envf
 
 let find_variable env name =
-  let globalScope = match env.node_scope.parent with
-    Some scope -> scope
-    |None -> raise(Error("No Global Scope3"))
-  in
-    try List.find (fun (s,_,_) -> s=name) env.node_scope.variables
-    with Not_found -> List.find(fun (s,_,_) -> s=name) globalScope.variables
+  try List.find (fun(s,_,_) -> s = name) env.node_scope.variables
+  with Not_found ->  
+    let globalScope = (match env.node_scope.parent with
+      Some scope -> scope
+      |None -> raise(Error("No Global Scope3")))
+      in List.find(fun (s,_,_) -> s=name) globalScope.variables
 
 let find_local_variable env name =
     List.find (fun (s,_,_) -> s=name) env.node_scope.variables
@@ -181,14 +181,14 @@ let rec check_expr env e = match e with
                 raise (Error("Undeclared Function: " ^ get_ident_name id))
   
 let get_node_scope env name = 
-  let globalScope = match env.node_scope.parent with
-    Some scope -> scope
-    |None -> raise(Error("No Global Scope4"))
-  in 
+  if env.location = "dfa" then DFAScope
+  else
     try (let (_,_,_) = List.find (fun (s,_,_) -> s=name) env.node_scope.variables in NodeScope)
-              with Not_found -> try (let (_,_,_) = List.find(fun (s,_,_) ->
-                s=name) globalScope.variables in DFAScope)
-                    with Not_found -> raise(Error("get_node_scope is failing"))
+    with Not_found -> let globalScope = (match env.node_scope.parent with
+        Some scope -> scope
+        |None -> raise(Error("No Global Scope4")))
+    in try (let (_,_,_) = List.find(fun (s,_,_) -> s=name) globalScope.variables in DFAScope)
+    with Not_found -> raise(Error("get_node_scope is failing"))
 
 let rec get_sexpr env e = match e with
       IntLit(i) -> SIntLit(i, Datatype(Int))
