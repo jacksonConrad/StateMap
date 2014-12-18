@@ -38,7 +38,7 @@ sc:
 
 .PHONY : clean
 clean:
-	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler output.py a.out ast_print
+	rm -f parser.ml parser.mli scanner.ml *.cmo *.cmi statemap compiler *.py a.out ast_print
 
 .PHONY : all
 all: 
