@@ -114,10 +114,16 @@ void DFA main()
     randomGroup
     {
         setGroup = "bad";
-        print("As you firmly tell yourself that you need to stay in this course, you do so. You join a random group.");
+        print("Class finishes, and you decide to leave to grab a bite. While waiting in line at Hamilton Deli, you make the firm decision that you'll stay in this class - after all, you have a very uncertain feeling that this might be a required course.");
+
+        print("Days pass and your attendance in class gradually falls. It just happens that PLT occurs when you NEED to eat and take an afternoon nap - it also helps that the lectures are posted in video form online later. However, you realize that you need to join a group and you still don't know anyone in class. You message the TA and she pairs you with other students who appear to also be skipping class and thus do not know anyone.");
+
+        print("More weeks pass and an email was sent out, reminding you that your language proposal is due soon. Wait. Language proposal?");
+
+        print("You quickly attempt to arrange a meeting with your group. However, due to conflicting schedules, you all decide to talk via emails. After a few weak arguments, the group came to a consensus on a language.");
         print("What language do you guys decide on?");
-        print("1) The Whitespace Language.");
-        print("2) Lava.");
+        print("1) The Whitespace Language. Dude, it'll be awesome. You only need two keys.");
+        print("2) Lava, which is kinda like Java, but better!");
 
         choice = input("\n");
         whiteSpace  <- choice == "1";
@@ -132,12 +138,23 @@ void DFA main()
 
         print("Your angel took the form of a young man with large eyes and a scraggly beard. He looked at you and you felt like an ant being examined by a magnifying glass held by an entire committee of entomologists. You express your thanks and slide your seat slightly back.");
 
-        print("Footsteps resounded across the hallway and a giant of a man marched into the room. ");
+        print("Footsteps resounded across the hallway and a giant of a man marched into the room. Severity embodies Professor Stephen Edwards - a man with steely eyes, a hard nose, and a brow set rigid by intelligence. Without looking at the student masses flooding the room, he strides to the desk, and sets down a small network. Conversation continued near the back, but the front immediately was silenced as they waited for the first words of the class.");
+
+        print("Finished with setting his mic and slides, he spoke: \"Okay, so I'm Stephen Edwards. This is Programming Languages and Translators - COMS 4115, all that good stuff. Fall 2014. You've figured that stuff out. My goal today is to convince you all not to take this class because obviously there are far too many of you ...\" Light chuckles and murmurs of agreement follow this statement, especially from the people attempting to see the speaker through the doors leading into the hallways.\n");
+
+        print("He continued, \"So, the main thing you're going to do in this class, assuming that you don't drop it like I want you to, is a semester long TEAM project. This is a team programming project. Now, the team part of it is easily the worst, most difficult aspect of all of it, but just to make it more difficult, I'm going to make you design and implement your own language and a compiler for it ... you're going to have to work with other human beings. This really sucks.\"\n");
+
+        print("You disagree - you haven't had many opportunities to work with a team on a large programming project and have been wanting experience in it. And the idea of creating your own working language excites you - you can't even fathom how such a thing is possible with your current knowledge.");
+
+        print("He continues lecturing, and hunger sets in. You realize that this class occurs right around the time you have lunch - you won't have a chance before due to your work-study. A fleeting desire to free up this time slot crosses your mind, but you quickly wave it away. Focusing on the lecture helps - Professor Edwards slips in occasional dry jokes and frequent jabs at Java. All you really know is Java.");
+
+        print("The class eventually finishes and students began to pool around the front desk. You stand up and stretch, picturing biting into a Hungry Man sandwich from Hamilton Deli with great detail. Before you leave, you hear the student from before laughing. The thought of introducing yourself to him occurs to you - after all, not knowing anyone in a class centered around a massive group project only hurts you.");
+
         print("You make a choice to:");
 
-        print("1) Leave the class and find another thing to do in the timeslot.");
-        print("2) Introduce yourself.");
-        print("3) Leave and join a random group.");
+        print("1) Leave and sign up for a later class so that you won't die from hunger.");
+        print("2) Ignore your hunger and introduce yourself to the student.");
+        print("3) Leave and order a Hungry Man from Hamilton Deli.");
         choice = input("\n");
 
         dropkicked  <- choice == "1";
@@ -149,7 +166,10 @@ void DFA main()
 
     dropkicked 
     {
-        print("You drop the class.");
+        print("You drop the class and decided to sign up for another class later in the evening. The class doesn't matter, as this CYOA story is centered around PLT, and you've ended that line.");
+
+        print("You leave Columbia, a unhireable disgrace.");
+
         input("The end.");
 
         returnNode <- *;
@@ -158,11 +178,13 @@ void DFA main()
     goodGroup 
     {
         setGroup = "good";
-        print("You join a good group.");
+        print("You quickly make friends with the helpful student. Luckily, he had three friends set in the group and they were considering adding one more person. You immediately accept his offer to join the group.");
+
+        print("After the very next class, your newfound friends decided to stay back and discuss a bit about potential language ideas. Concepts were tossed back and forth and pondered, and one language eventually rose to the top of consideration.");
 
         print("The language you decide on is:");
-        print("1) Lava");
-        print("2) StateMap");
+        print("1) Lava. It's not gonna be Java, we promise. It'll be better!");
+        print("2) Hey, DFAs are dope and there's a lot you can do with them. What about a DFA simulating language?");
         choice = input("\n");
 
         Lava        <- choice == "1";
@@ -173,7 +195,7 @@ void DFA main()
 
     whiteSpace 
     {
-        print("You attempt to make the Whitespace language. It didn't go well.");
+        print("You attempt to make the Whitespace language. It didn't go past the proposal state. The TAs and other students laughed you out of Mudd.");
         input("The end.");
 
         returnNode <- *;
@@ -181,8 +203,11 @@ void DFA main()
     
     Lava 
     {
-        print("You create the Lava language. An argument over leadership arises.");
+        print("After some thought, your group decides on the Lava language. It's going to be a general purpose computer programming language that is concurrent, class-based, object-oriented, and specifically designed to have as few implementation dependencies as possible. It is intended to let application developers \"write once, run anywhere\" (WORA), meaning that code that runs on one platform does not need to be recompiled to run on another! Lava applications are typically compiled to bytecode that can run on any Lava virtual machine (LVM) regardless of computer architecture.");
 
+        print("After a few weeks of meetings in person in the computer science lounge, an argument over leadership arises. You realize after working with this group for a while that you're probably the best suited to take this project to completion. However, another student in the group seems to want the leadership position.");
+
+        print("What do you do?");
         print("1) Attempt to obtain leadership.");
         print("2) Give up the position of leadership.");
         choice = input("\n");
@@ -196,7 +221,7 @@ void DFA main()
 
     StateMap 
     {
-        print("You pick a great language.");
+        print("You pick a great language. You guys work hard and create a final report that rivals the one listed in the directory hosting a folder called sample_programs that holds this CYOA.");
         input("Hit enter to continue.");
 
         goodEnding      <- *;
@@ -204,7 +229,7 @@ void DFA main()
 
     goodEnding 
     {
-        print("You win at everything.");
+        print("During the presentation, Professor Edwards only seemed unimpressed rather than disgusted. Your class performance was a triumph and you walk away, an individual carved by trial and cast in victory.");
         input("The end.");
 
         returnNode <- *;
@@ -212,7 +237,9 @@ void DFA main()
     
     forgetProject 
     {
-        print("Your new leader forgot the project.");
+        print("You decided to give up the leadership position.");
+        print("The meetings occurred less and less frequently, and soon you even stop watching the lectures online. By the time of the first midterm, you realize that you've missed two of three homeworks required in the semester, and your entire group forgot about the group project.");
+        print("You drop the class.");
         input("The end.");
 
         returnNode <- *;
@@ -234,7 +261,7 @@ void DFA main()
 
     defenestration 
     {
-        print("You get forcibly thrown out a window.");
+        print("You get forcibly thrown out a window by the entire group. As you fall, you note that this situation feels a bit familiar ...");
 
         input("The end.");
         returnNode <- *;
@@ -242,7 +269,7 @@ void DFA main()
 
     notOkay 
     {
-        print("For some reason, the project wasn't very well received.");
+        print("You became the leader and attempt to pull the group together as hard as you can. Another student notes your efforts and does her best to contribute, but in the end, the project was too big for two students. For some reason, the project wasn't very well received, and you take your anger out in your discussion about the other students' role in the final report - which YOU have to put together.");
         input("The end.");
 
         returnNode <- *;
@@ -250,11 +277,11 @@ void DFA main()
 
     okaaay 
     {
-        print("Your team managed to pull something out but there was a crucial error with the language itself.");
+        print("Your team managed to pull something out but there was a crucial error with the language itself. It's a Java copy. Professor Edwards tosses you out of a window.");
         input("The end.");
 
         returnNode <- *;
-    }
+    } 
 
     returnNode
     {
