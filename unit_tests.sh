@@ -11,7 +11,6 @@ do
   FILENAME="${TESTFILE:0:$LEN}"
 	OUTFILENAME="${TESTFILE:0:$LEN}.output"
 	TESTFILENAME="${TESTFILE:0:$LEN}.out"
-  echo $FILENAME
 	echo "Compiling ... " >> "$LOGFILE"
 	("$COMPILER" "$FILENAME" < "$TESTFILE") 2>> "$LOGFILE"
 
